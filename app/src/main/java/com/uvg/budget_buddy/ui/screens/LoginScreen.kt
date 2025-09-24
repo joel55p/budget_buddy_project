@@ -1,11 +1,13 @@
 package com.uvg.budget_buddy.ui.screens
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -13,6 +15,12 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+
+// Definir las clases de datos necesarias
+data class MonthlyPoint(
+    val month: String,
+    val value: Float
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -22,6 +30,14 @@ fun LoginScreen(
 ) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    // Definir los datos de ejemplo para el gráfico
+    val monthlyData = listOf(
+        MonthlyPoint("Ene", 800f),
+        MonthlyPoint("Feb", 850f),
+        MonthlyPoint("Mar", 900f),
+        MonthlyPoint("Abr", 950f)
+    )
 
     Column(
         modifier = Modifier
@@ -59,6 +75,44 @@ fun LoginScreen(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Campos de entrada
+        OutlinedTextField(
+            value = email,
+            onValueChange = { email = it },
+            label = { Text("Email") },
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = password,
+            onValueChange = { password = it },
+            label = { Text("Contraseña") },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botones
+        Button(
+            onClick = onLoginClick,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Iniciar Sesión")
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        TextButton(onClick = onRegisterClick) {
+            Text("¿No tienes cuenta? Regístrate")
+        }
 
         Spacer(modifier = Modifier.height(32.dp))
 
@@ -127,14 +181,5 @@ fun LoginScreen(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Bottom Navigation
-        BottomNavigation(
-            currentScreen = "dashboard",
-            onAddIncomeClick = onAddIncomeClick,
-            onAddExpenseClick = onAddExpenseClick
-        )
     }
 }

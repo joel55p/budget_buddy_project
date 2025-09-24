@@ -2,11 +2,8 @@ package com.uvg.budget_buddy.ui.screens
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -16,7 +13,6 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -66,7 +62,7 @@ fun DashboardScreen(
                 fontWeight = FontWeight.Bold
             )
             Icon(
-                Icons.Default.Info,
+                imageVector = Icons.Default.Info,
                 contentDescription = "Información",
                 tint = Color.Gray
             )
@@ -85,6 +81,13 @@ fun DashboardScreen(
             Column(
                 modifier = Modifier.padding(16.dp)
             ) {
+                Text(
+                    text = "Resumen mensual",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
@@ -128,4 +131,121 @@ fun DashboardScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(32)
+        Spacer(modifier = Modifier.height(32.dp))
+
+        // Line Chart - Tendencia mensual
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(200.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Text(
+                    text = "Tendencia de Balance",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier.padding(bottom = 16.dp)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(120.dp)
+                ) {
+                    Canvas(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        val width = size.width
+                        val height = size.height
+
+                        val points = monthlyData.mapIndexed { index, point ->
+                            Offset(
+                                x = (width / (monthlyData.size - 1)) * index,
+                                y = height - (point.value / 1000f) * height
+                            )
+                        }
+
+                        // Draw line
+                        for (i in 0 until points.size - 1) {
+                            drawLine(
+                                color = Color(0xFF4A90E2),
+                                start = points[i],
+                                end = points[i + 1],
+                                strokeWidth = 4.dp.toPx()
+                            )
+                        }
+
+                        // Draw points
+                        points.forEach { point ->
+                            drawCircle(
+                                color = Color(0xFF4A90E2),
+                                radius = 6.dp.toPx(),
+                                center = point
+                            )
+                        }
+                    }
+                }
+
+                // Month labels
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    monthlyData.forEach { point ->
+                        Text(
+                            text = point.month,
+                            fontSize = 12.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+
+        // Action Buttons
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Button(
+                onClick = onAddIncomeClick,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF27AE60)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Agregar Ingreso")
+            }
+
+            Button(
+                onClick = onAddExpenseClick,
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFFE74C3C)
+                )
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Agregar Gasto")
+            }
+        }
+    }
+}
