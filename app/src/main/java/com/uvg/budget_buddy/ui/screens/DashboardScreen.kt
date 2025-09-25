@@ -14,6 +14,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.Preview
+import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 import androidx.compose.ui.unit.sp
 
 data class FinancialData(
@@ -22,7 +24,7 @@ data class FinancialData(
     val color: Color
 )
 
-data class MonthlyPoint(
+data class MonthlyPoint1(
     val month: String,
     val value: Float
 )
@@ -39,10 +41,10 @@ fun DashboardScreen(
     )
 
     val monthlyData = listOf(
-        MonthlyPoint("Ene", 800f),
-        MonthlyPoint("Mar", 850f),
-        MonthlyPoint("May", 900f),
-        MonthlyPoint("Jul", 950f)
+        MonthlyPoint1("Ene", 800f),
+        MonthlyPoint1("Mar", 850f),
+        MonthlyPoint1("May", 900f),
+        MonthlyPoint1("Jul", 950f)
     )
 
     Column(
@@ -247,5 +249,16 @@ fun DashboardScreen(
                 Text("Agregar Gasto")
             }
         }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun DashboardScreenPreview() {
+    Budget_buddyTheme {
+        DashboardScreen(
+            onAddIncomeClick = { },
+            onAddExpenseClick = { }
+        )
     }
 }
