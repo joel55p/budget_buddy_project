@@ -1,24 +1,21 @@
-package com.uvg.budget_buddy.ui.screens
+package com.uvg.budget_buddy.ui.features.addExpense
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 import androidx.compose.ui.unit.sp
+import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -144,11 +141,6 @@ fun AddExpenseScreen(
                 modifier = Modifier.padding(8.dp)
             )
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Bottom Navigation
-        BottomNavigation(currentScreen = "gasto")
     }
 }
 
@@ -156,9 +148,6 @@ fun AddExpenseScreen(
 @Composable
 fun AddExpenseScreenPreview() {
     Budget_buddyTheme {
-        AddExpenseScreen(
-            onSaveClick = { },
-            onBackClick = { }
-        )
+        AddExpenseScreen({}, {})
     }
 }

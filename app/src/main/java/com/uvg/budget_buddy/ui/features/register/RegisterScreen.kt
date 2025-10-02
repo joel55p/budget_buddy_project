@@ -1,4 +1,4 @@
-package com.uvg.budget_buddy.ui.screens
+package com.uvg.budget_buddy.ui.features.register
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
 import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 import androidx.compose.ui.unit.sp
+import com.uvg.budget_buddy.ui.features.login.LoginScreen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

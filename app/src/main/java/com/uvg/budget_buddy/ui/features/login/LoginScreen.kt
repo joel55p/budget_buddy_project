@@ -1,4 +1,4 @@
-package com.uvg.budget_buddy.ui.screens
+package com.uvg.budget_buddy.ui.features.login
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*

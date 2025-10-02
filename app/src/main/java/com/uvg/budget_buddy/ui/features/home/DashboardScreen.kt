@@ -1,22 +1,21 @@
-package com.uvg.budget_buddy.ui.screens
+package com.uvg.budget_buddy.ui.features.home
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.tooling.preview.Preview
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
 data class FinancialData(
     val label: String,
@@ -72,7 +71,7 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // Financial Summary Chart (Bar Chart Representation)
+        // Financial Summary Chart
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -100,7 +99,6 @@ fun DashboardScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             modifier = Modifier.weight(1f)
                         ) {
-                            // Bar representation
                             Box(
                                 modifier = Modifier
                                     .width(60.dp)
@@ -135,7 +133,7 @@ fun DashboardScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // Line Chart - Tendencia mensual
+        // Line Chart
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -171,7 +169,6 @@ fun DashboardScreen(
                             )
                         }
 
-                        // Draw line
                         for (i in 0 until points.size - 1) {
                             drawLine(
                                 color = Color(0xFF4A90E2),
@@ -181,7 +178,6 @@ fun DashboardScreen(
                             )
                         }
 
-                        // Draw points
                         points.forEach { point ->
                             drawCircle(
                                 color = Color(0xFF4A90E2),
@@ -192,7 +188,6 @@ fun DashboardScreen(
                     }
                 }
 
-                // Month labels
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -207,48 +202,6 @@ fun DashboardScreen(
                 }
             }
         }
-
-        Spacer(modifier = Modifier.weight(1f))
-
-        // Action Buttons
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Button(
-                onClick = onAddIncomeClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF27AE60)
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Agregar Ingreso")
-            }
-
-            Button(
-                onClick = onAddExpenseClick,
-                modifier = Modifier.weight(1f),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFE74C3C)
-                )
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Agregar Gasto")
-            }
-        }
     }
 }
 
@@ -256,9 +209,6 @@ fun DashboardScreen(
 @Composable
 fun DashboardScreenPreview() {
     Budget_buddyTheme {
-        DashboardScreen(
-            onAddIncomeClick = { },
-            onAddExpenseClick = { }
-        )
+        DashboardScreen({}, {})
     }
 }
