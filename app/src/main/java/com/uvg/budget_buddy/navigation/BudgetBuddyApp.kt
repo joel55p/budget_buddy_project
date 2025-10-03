@@ -25,22 +25,26 @@ import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import kotlinx.coroutines.launch
 import androidx.compose.ui.unit.dp
 
+// el proposito de esta clase es de actuar como controlador principal de navegación y estructura de la app
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BudgetBuddyApp() {
+fun BudgetBuddyApp() { //es la que se llamara en el main activity
+    // NavController: Maneja la navegación entre pantallas
     val navController = rememberNavController()
+    // Observa la pantalla actual en el stack de navegación
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
-    val tabRoutes = listOf(
+    val tabRoutes = listOf( // Define qué pantallas muestran TopBar y BottomBar
         Screen.Dashboard.route,
         Screen.AddIncome.route,
         Screen.AddExpense.route
     )
-
+// Estado del drawer (menú lateral)
     val drawerState = rememberDrawerState(DrawerValue.Closed)
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope()// Para operaciones asíncronas
 
+    // ModalNavigationDrawer: Menú lateral deslizable desde la izquierda
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -50,19 +54,19 @@ fun BudgetBuddyApp() {
                     modifier = Modifier.padding(16.dp),
                     style = MaterialTheme.typography.titleMedium
                 )
-
+                // Cada item del drawer navega a su pantalla
                 NavigationDrawerItem(
                     label = { Text("Perfil") },
                     selected = false,
                     onClick = {
                         scope.launch {
-                            drawerState.close()
-                            navController.navigate(Screen.Profile.route)
+                            drawerState.close()// Cierra el drawer
+                            navController.navigate(Screen.Profile.route) // Navega a la pantalla de perfil
                         }
                     }
                 )
                 NavigationDrawerItem(
-                    label = { Text("Configuración") },
+                    label = { Text("Configuración") }, //para settings
                     selected = false,
                     onClick = {
                         scope.launch {
@@ -82,8 +86,9 @@ fun BudgetBuddyApp() {
                     onClick = { scope.launch { drawerState.close() } }
                 )
 
-                HorizontalDivider()
+                HorizontalDivider() // Separador horizontal
 
+                // Item de cerrar sesión
                 NavigationDrawerItem(
                     label = { Text("Cerrar sesión") },
                     selected = false,
@@ -99,9 +104,10 @@ fun BudgetBuddyApp() {
             }
         }
     ) {
-        Scaffold(
+        Scaffold( // Estructura principal de la pantalla que incluye TopBar, BottomBar y contenido
             topBar = {
                 if (currentRoute in tabRoutes) {
+                    // Solo muestra TopBar en las pantallas de tabs
                     TopAppBar(
                         title = {
                             Text(
@@ -113,7 +119,9 @@ fun BudgetBuddyApp() {
                                 }
                             )
                         },
+
                         navigationIcon = {
+                            // Botón de menú hamburguesa
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(Icons.Default.Menu, contentDescription = "Menú")
                             }
@@ -127,6 +135,7 @@ fun BudgetBuddyApp() {
                 }
             },
             bottomBar = {
+                // Solo muestra BottomBar en las pantallas de tabs
                 if (currentRoute in tabRoutes) {
                     BottomNavigation(
                         currentScreen = when (currentRoute) {
@@ -135,7 +144,7 @@ fun BudgetBuddyApp() {
                             Screen.AddExpense.route -> "gasto"
                             else -> ""
                         },
-                        onHomeClick = {
+                        onHomeClick = { //navega a dashboard
                             navController.navigate(Screen.Dashboard.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -144,7 +153,7 @@ fun BudgetBuddyApp() {
                                 restoreState = true
                             }
                         },
-                        onAddIncomeClick = {
+                        onAddIncomeClick = {//navega a add income
                             navController.navigate(Screen.AddIncome.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -153,7 +162,7 @@ fun BudgetBuddyApp() {
                                 restoreState = true
                             }
                         },
-                        onAddExpenseClick = {
+                        onAddExpenseClick = { //navega a add expense
                             navController.navigate(Screen.AddExpense.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
@@ -166,14 +175,17 @@ fun BudgetBuddyApp() {
                 }
             }
         ) { innerPadding ->
+            // NavHost: Contenedor que cambia de pantalla según la ruta
             NavHost(
                 navController = navController,
-                startDestination = Screen.Login.route,
+                startDestination = Screen.Login.route, //sera la primera pantalla
                 modifier = Modifier.padding(innerPadding)
             ) {
+                // Define cada pantalla y su comportamiento
                 composable(Screen.Login.route) {
                     LoginScreen(
                         onLoginClick = {
+                            // Al hacer login, va a Onboarding y elimina Login del stack
                             navController.navigate(Screen.Onboarding.route) {
                                 popUpTo(Screen.Login.route) { inclusive = true }
                             }

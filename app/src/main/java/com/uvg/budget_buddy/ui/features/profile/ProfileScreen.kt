@@ -20,17 +20,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
+//Muestra información del perfil del usuario
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onBackClick: () -> Unit,
-    onEditProfile: () -> Unit
+    onBackClick: () -> Unit, // Regresa a la pantalla anterior
+    onEditProfile: () -> Unit// Placeholder para editar perfil
+
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Mi Perfil") },
                 navigationIcon = {
+                    // Botón de flecha para volver
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
@@ -52,17 +55,17 @@ fun ProfileScreen(
         ) {
             Spacer(Modifier.height(24.dp))
 
-            // Avatar del usuario
+            // Avatar circular con icono de usuario
             Box(
                 modifier = Modifier
                     .size(120.dp)
-                    .clip(CircleShape)
+                    .clip(CircleShape) // Hace el box circular
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     Icons.Default.Person,
-                    contentDescription = "Avatar",
+                    contentDescription = "Avatar", //avatar
                     modifier = Modifier.size(64.dp),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -70,14 +73,14 @@ fun ProfileScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            Text(
+            Text( // Nombre del usuario
                 text = "Juan Pérez",
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface
             )
 
-            Text(
+            Text( //info
                 text = "Miembro desde Sep 2025",
                 fontSize = 14.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -154,7 +157,7 @@ fun ProfileScreen(
 
             Spacer(Modifier.weight(1f))
 
-            // Botón de editar perfil
+            // Botón de editar perfil que aun no hace nada
             Button(
                 onClick = onEditProfile,
                 modifier = Modifier.fillMaxWidth(),
@@ -176,7 +179,7 @@ fun ProfileScreen(
 }
 
 @Composable
-fun ProfileInfoItem(
+fun ProfileInfoItem( // Componente reutilizable para mostrar información
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     label: String,
     value: String
@@ -209,7 +212,7 @@ fun ProfileInfoItem(
 }
 
 @Composable
-fun StatItem(value: String, label: String) {
+fun StatItem(value: String, label: String) {// Componente para mostrar estadísticas
     Column(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -17,9 +17,10 @@ import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit,
-    onLogout: () -> Unit
+    onBackClick: () -> Unit, // Regresa a pantalla anterior
+    onLogout: () -> Unit // Cierra sesión
 ) {
+    // Estados locales para los switches
     var showLogoutDialog by remember { mutableStateOf(false) }
     var notificationsEnabled by remember { mutableStateOf(true) }
     var darkModeEnabled by remember { mutableStateOf(false) }
@@ -42,6 +43,7 @@ fun SettingsScreen(
         }
     ) { innerPadding ->
         Column(
+            // seccion 1: cuenta
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
@@ -75,7 +77,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            SectionTitle("Preferencias")
+            SectionTitle("Preferencias") //va a ser la seccion 2
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -112,7 +114,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            SectionTitle("Datos y Privacidad")
+            SectionTitle("Datos y Privacidad") //seccion 3
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -141,7 +143,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(24.dp))
 
-            SectionTitle("Información")
+            SectionTitle("Información") //seccion 4
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -168,7 +170,7 @@ fun SettingsScreen(
             }
 
             Spacer(Modifier.height(32.dp))
-
+            // Botón de cerrar sesión
             Button(
                 onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -187,7 +189,7 @@ fun SettingsScreen(
             }
         }
     }
-
+    // Diálogo de confirmación
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
@@ -197,7 +199,7 @@ fun SettingsScreen(
                 TextButton(
                     onClick = {
                         showLogoutDialog = false
-                        onLogout()
+                        onLogout()// Ejecuta la acción de logout
                     }
                 ) {
                     Text("Confirmar", color = MaterialTheme.colorScheme.error)
@@ -211,7 +213,7 @@ fun SettingsScreen(
         )
     }
 }
-
+// Componente para títulos de sección
 @Composable
 fun SectionTitle(text: String) {
     Text(
@@ -224,7 +226,7 @@ fun SectionTitle(text: String) {
 }
 
 @Composable
-fun SettingsItem(
+fun SettingsItem(// Componente clickeable para items de configuración
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
@@ -267,7 +269,7 @@ fun SettingsItem(
 }
 
 @Composable
-fun SettingsSwitchItem(
+fun SettingsSwitchItem(// Componente con switch para items toggleables
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
@@ -300,6 +302,7 @@ fun SettingsSwitchItem(
             )
         }
         Switch(
+            // Switch interactivo
             checked = checked,
             onCheckedChange = onCheckedChange
         )

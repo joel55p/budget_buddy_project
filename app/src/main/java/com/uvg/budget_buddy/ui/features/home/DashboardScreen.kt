@@ -23,16 +23,17 @@ import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 import com.uvg.budget_buddy.ui.theme.SoftBlue
 import com.uvg.budget_buddy.ui.theme.SoftGreen
 import com.uvg.budget_buddy.ui.theme.SoftRed
-
+//sera la pantalla principal que muestra resumen financiero
 data class FinancialData(val label: String, val amount: String, val color: Color)
 data class MonthlyPoint1(val month: String, val value: Float)
 
 @Composable
 fun DashboardScreen(
-    onAddIncomeClick: () -> Unit,
-    onAddExpenseClick: () -> Unit
+    onAddIncomeClick: () -> Unit, // Callback para navegar a AddIncome
+    onAddExpenseClick: () -> Unit// Callback para navegar a AddExpense
 ) {
     val financialData = listOf(
+        //datos quemados
         FinancialData("Gastos",   "Q 348.28", SoftRed),    // rojo suave
         FinancialData("Ingresos", "Q 1,200.00", SoftGreen),// verde suave
         FinancialData("Balance",  "Q 850.75", SoftBlue)    // azul suave
@@ -44,12 +45,12 @@ fun DashboardScreen(
         MonthlyPoint1("Jul", 950f)
     )
 
-    Column(
+    Column(// Column para contener los elementos
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
-        Row(
+        Row(// Row para contener el título y el icono
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -60,7 +61,8 @@ fun DashboardScreen(
 
         Spacer(Modifier.height(24.dp))
 
-        Card(
+        // Card 1: Gráfica de barras con resumen mensual
+        Card( // Card para el resumen mensual
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp),
@@ -99,7 +101,7 @@ fun DashboardScreen(
         }
 
         Spacer(Modifier.height(32.dp))
-
+        // Card 2: Gráfica de línea con tendencia
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -126,6 +128,7 @@ fun DashboardScreen(
                         }
                     }
                 }
+                // Etiquetas de meses debajo de la gráfica
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     monthlyData.forEach { point ->
                         Text(text = point.month, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
