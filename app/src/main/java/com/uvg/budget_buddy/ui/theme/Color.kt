@@ -2,10 +2,19 @@ package com.uvg.budget_buddy.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Verdes principales
+val GreenPrimary       = Color(0xFF6BCB77) // verde suave (header, icono login)
+val GreenPrimaryDark   = Color(0xFF3FA857) // verde más oscuro (botones)
+val GreenPrimaryLight  = Color(0xFFA8E6B0) // muy suave (fondos/acentos ligeros)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+// Grises claros + blanco
+val GrayLight1         = Color(0xFFF2F4F7)
+val GrayLight2         = Color(0xFFE5E7EB)
+val PureWhite          = Color(0xFFFFFFFF)
+
+// Azul para enlaces (Regístrate)
+val LinkBlue           = Color(0xFF1E6AE1)
+
+val SoftGreen = Color(0xFF51CF66)
+val SoftRed = Color(0xFFFF6B6B)
+val SoftBlue = Color(0xFF4DABF7)

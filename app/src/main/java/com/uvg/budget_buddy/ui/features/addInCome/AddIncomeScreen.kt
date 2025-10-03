@@ -18,11 +18,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddIncomeScreen(
     onSaveClick: () -> Unit,
-    onBackClick: () -> Unit
+    onBackClick: () -> Unit // se mantiene la firma, pero NO se dibuja flecha
 ) {
     var amount by remember { mutableStateOf("0.00") }
     var date by remember { mutableStateOf("September 11th, 2025") }
@@ -32,83 +31,40 @@ fun AddIncomeScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // Header
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-            }
-            Text(
-                text = "Añadir Ingreso",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.width(48.dp))
-        }
+        // **Header removido** (no hay flecha)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Text("Añadir Ingreso", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(24.dp))
 
-        Text(
-            text = "Detalles del Ingreso",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
+        Text("Monto", style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = amount,
+            onValueChange = { amount = it },
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Monto",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        Text("Fecha", style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = date,
+            onValueChange = { date = it },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true
+        )
 
-            OutlinedTextField(
-                value = amount,
-                onValueChange = { amount = it },
-                modifier = Modifier.fillMaxWidth(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Fecha",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = date,
-                onValueChange = { date = it },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
-                },
-                readOnly = true
-            )
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(Modifier.weight(1f))
 
         Button(
             onClick = onSaveClick,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A90E2))
-        ) {
-            Text(
-                text = "Guardar Ingreso",
-                color = Color.White,
-                modifier = Modifier.padding(8.dp)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
+        ) {
+            Text("Guardar Ingreso")
         }
     }
 }

@@ -17,7 +17,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddExpenseScreen(
     onSaveClick: () -> Unit,
@@ -32,114 +31,49 @@ fun AddExpenseScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // Header
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        // **Header removido** (no hay flecha)
+
+        Text("Agregar Gasto", style = MaterialTheme.typography.titleLarge)
+        Spacer(Modifier.height(24.dp))
+
+        Text("Monto del Gasto", style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = amount,
+            onValueChange = { amount = it },
             modifier = Modifier.fillMaxWidth()
-        ) {
-            IconButton(onClick = onBackClick) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-            }
-            Text(
-                text = "Agregar Gasto",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.width(48.dp))
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-
-        Text(
-            text = "Detalles del Gasto",
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Monto del Gasto",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
+        Text("Categoría", style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = category,
+            onValueChange = { /* abrir selector si quieres */ },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true
+        )
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
-            ) {
-                Text(
-                    text = "S/. $amount",
-                    fontSize = 16.sp,
-                    modifier = Modifier.padding(16.dp)
-                )
-            }
-        }
+        Spacer(Modifier.height(16.dp))
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Text("Fecha del Gasto", style = MaterialTheme.typography.bodyMedium)
+        OutlinedTextField(
+            value = date,
+            onValueChange = { },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true
+        )
 
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Categoría",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = category,
-                onValueChange = { },
-                modifier = Modifier.fillMaxWidth(),
-                trailingIcon = {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "Seleccionar categoría")
-                },
-                readOnly = true
-            )
-        }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = "Fecha del Gasto",
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(bottom = 8.dp)
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(text = date, fontSize = 16.sp)
-                    Icon(Icons.Default.DateRange, contentDescription = "Seleccionar fecha")
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(Modifier.weight(1f))
 
         Button(
             onClick = onSaveClick,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A90E2))
-        ) {
-            Text(
-                text = "Guardar Gasto",
-                color = Color.White,
-                modifier = Modifier.padding(8.dp)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
+        ) {
+            Text("Guardar Gasto")
         }
     }
 }

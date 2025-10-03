@@ -34,7 +34,7 @@ fun OnboardingScreen(
             text = "✱ BudgetBuddy",
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
-            color = Color(0xFF4A90E2)
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -48,7 +48,7 @@ fun OnboardingScreen(
         Text(
             text = "Configura tu primer presupuesto para empezar a ahorrar.",
             fontSize = 14.sp,
-            color = Color.Gray,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 16.dp)
         )
@@ -65,7 +65,7 @@ fun OnboardingScreen(
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFFF5F5F5))
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Text(
                     text = "S/. $budgetAmount",
@@ -100,7 +100,10 @@ fun OnboardingScreen(
                                 onClick = { selectedPeriod = period }
                             ),
                         colors = CardDefaults.cardColors(
-                            containerColor = if (isSelected) Color(0xFF4A90E2) else Color.LightGray
+                            containerColor = if (isSelected)
+                                MaterialTheme.colorScheme.primary
+                            else
+                                MaterialTheme.colorScheme.surfaceVariant
                         )
                     ) {
                         Text(
@@ -109,7 +112,10 @@ fun OnboardingScreen(
                                 .padding(16.dp)
                                 .fillMaxWidth(),
                             textAlign = TextAlign.Center,
-                            color = if (isSelected) Color.White else Color.Black,
+                            color = if (isSelected)
+                                MaterialTheme.colorScheme.onPrimary
+                            else
+                                MaterialTheme.colorScheme.onSurface,
                             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal
                         )
                     }
@@ -122,14 +128,11 @@ fun OnboardingScreen(
         Button(
             onClick = onStartClick,
             modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4A90E2))
-        ) {
-            Text(
-                text = "Empezar",
-                color = Color.White,
-                modifier = Modifier.padding(8.dp)
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary
             )
-        }
+        ) { Text("Empezar") }
     }
 }
 

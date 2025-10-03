@@ -8,35 +8,42 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
 fun BottomNavigation(
     currentScreen: String,
-    onHomeClick: () -> Unit,
+    onHomeClick: () -> Unit,               // <--- NUEVO
     onAddIncomeClick: () -> Unit,
     onAddExpenseClick: () -> Unit
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Home
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
-            IconButton(onClick = onHomeClick) {
+            IconButton(onClick = onHomeClick) {                         // <--- usar callback
                 Icon(
                     Icons.Default.Home,
                     contentDescription = "Inicio",
-                    tint = if (currentScreen == "dashboard") Color(0xFF4A90E2) else Color.Gray
+                    tint = if (currentScreen == "dashboard")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 "Inicio",
                 fontSize = 12.sp,
-                color = if (currentScreen == "dashboard") Color(0xFF4A90E2) else Color.Gray
+                color = if (currentScreen == "dashboard")
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -46,14 +53,19 @@ fun BottomNavigation(
                 Icon(
                     Icons.Default.Add,
                     contentDescription = "Ingreso",
-                    tint = if (currentScreen == "ingreso") Color(0xFF4A90E2) else Color.Gray,
-                    modifier = Modifier.size(24.dp)
+                    tint = if (currentScreen == "ingreso")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 "Ingreso",
                 fontSize = 12.sp,
-                color = if (currentScreen == "ingreso") Color(0xFF4A90E2) else Color.Gray
+                color = if (currentScreen == "ingreso")
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
 
@@ -62,14 +74,20 @@ fun BottomNavigation(
             IconButton(onClick = onAddExpenseClick) {
                 Text(
                     "≡",
-                    fontSize = 24.sp,
-                    color = if (currentScreen == "gasto") Color(0xFF4A90E2) else Color.Gray
+                    fontSize = 20.sp,
+                    color = if (currentScreen == "gasto")
+                        MaterialTheme.colorScheme.primary
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Text(
                 "Gasto",
                 fontSize = 12.sp,
-                color = if (currentScreen == "gasto") Color(0xFF4A90E2) else Color.Gray
+                color = if (currentScreen == "gasto")
+                    MaterialTheme.colorScheme.primary
+                else
+                    MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
