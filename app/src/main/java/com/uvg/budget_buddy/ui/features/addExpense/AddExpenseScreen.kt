@@ -31,7 +31,7 @@ fun AddExpenseScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // **Header removido** (no hay flecha)
+
 
         Text("Agregar Gasto", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(24.dp))
@@ -48,7 +48,7 @@ fun AddExpenseScreen(
         Text("Categoría", style = MaterialTheme.typography.bodyMedium)
         OutlinedTextField(
             value = category,
-            onValueChange = { /* abrir selector si quieres */ },
+            onValueChange = {  },
             modifier = Modifier.fillMaxWidth(),
             readOnly = true
         )

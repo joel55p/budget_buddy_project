@@ -3,17 +3,11 @@ package com.uvg.budget_buddy.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material3.Divider
-import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.ModalDrawerSheet
-import androidx.compose.material3.ModalNavigationDrawer
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.rememberDrawerState
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -26,24 +20,10 @@ import com.uvg.budget_buddy.ui.features.onBoarding.OnboardingScreen
 import com.uvg.budget_buddy.ui.features.home.DashboardScreen
 import com.uvg.budget_buddy.ui.features.addInCome.AddIncomeScreen
 import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseScreen
+import com.uvg.budget_buddy.ui.features.profile.ProfileScreen
+import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import kotlinx.coroutines.launch
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationDrawerItem
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.ui.unit.dp
-
-private fun NavController.goToTab(route: String) {
-    navigate(route) {
-        popUpTo(graph.findStartDestination().id) { saveState = true }
-        launchSingleTop = true
-        restoreState = true
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -52,7 +32,6 @@ fun BudgetBuddyApp() {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
-    // Pantallas donde se muestran Header + BottomBar
     val tabRoutes = listOf(
         Screen.Dashboard.route,
         Screen.AddIncome.route,
@@ -62,22 +41,35 @@ fun BudgetBuddyApp() {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    // Drawer por defecto (izquierda)
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Text("Menú", modifier = Modifier.padding(16.dp), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Menú",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
 
                 NavigationDrawerItem(
                     label = { Text("Perfil") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.Profile.route)
+                        }
+                    }
                 )
                 NavigationDrawerItem(
                     label = { Text("Configuración") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.Settings.route)
+                        }
+                    }
                 )
                 NavigationDrawerItem(
                     label = { Text("Categorías") },
@@ -90,11 +82,19 @@ fun BudgetBuddyApp() {
                     onClick = { scope.launch { drawerState.close() } }
                 )
 
-                Divider()
+                HorizontalDivider()
+
                 NavigationDrawerItem(
                     label = { Text("Cerrar sesión") },
                     selected = false,
-                    onClick = { scope.launch { drawerState.close() } }
+                    onClick = {
+                        scope.launch {
+                            drawerState.close()
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    }
                 )
             }
         }
@@ -113,7 +113,6 @@ fun BudgetBuddyApp() {
                                 }
                             )
                         },
-                        // Botón de menú a la IZQUIERDA
                         navigationIcon = {
                             IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                 Icon(Icons.Default.Menu, contentDescription = "Menú")
@@ -137,13 +136,31 @@ fun BudgetBuddyApp() {
                             else -> ""
                         },
                         onHomeClick = {
-                            navController.goToTab(Screen.Dashboard.route)
+                            navController.navigate(Screen.Dashboard.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         onAddIncomeClick = {
-                            navController.goToTab(Screen.AddIncome.route)
+                            navController.navigate(Screen.AddIncome.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         },
                         onAddExpenseClick = {
-                            navController.goToTab(Screen.AddExpense.route)
+                            navController.navigate(Screen.AddExpense.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
                         }
                     )
                 }
@@ -154,7 +171,6 @@ fun BudgetBuddyApp() {
                 startDestination = Screen.Login.route,
                 modifier = Modifier.padding(innerPadding)
             ) {
-                // LOGIN
                 composable(Screen.Login.route) {
                     LoginScreen(
                         onLoginClick = {
@@ -166,7 +182,6 @@ fun BudgetBuddyApp() {
                     )
                 }
 
-                // REGISTER -> vuelve a login
                 composable(Screen.Register.route) {
                     RegisterScreen(
                         onRegisterClick = { navController.popBackStack() },
@@ -174,7 +189,6 @@ fun BudgetBuddyApp() {
                     )
                 }
 
-                // ONBOARDING -> DASHBOARD
                 composable(Screen.Onboarding.route) {
                     OnboardingScreen(
                         onStartClick = {
@@ -185,19 +199,22 @@ fun BudgetBuddyApp() {
                     )
                 }
 
-                // TABS
                 composable(Screen.Dashboard.route) {
                     DashboardScreen(
                         onAddIncomeClick = {
                             navController.navigate(Screen.AddIncome.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
                         },
                         onAddExpenseClick = {
                             navController.navigate(Screen.AddExpense.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -209,7 +226,9 @@ fun BudgetBuddyApp() {
                     AddIncomeScreen(
                         onSaveClick = {
                             navController.navigate(Screen.Dashboard.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
@@ -222,12 +241,32 @@ fun BudgetBuddyApp() {
                     AddExpenseScreen(
                         onSaveClick = {
                             navController.navigate(Screen.Dashboard.route) {
-                                popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
                                 launchSingleTop = true
                                 restoreState = true
                             }
                         },
                         onBackClick = { navController.popBackStack() }
+                    )
+                }
+
+                composable(Screen.Profile.route) {
+                    ProfileScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onEditProfile = { } /* Placeholder */
+                    )
+                }
+
+                composable(Screen.Settings.route) {
+                    SettingsScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onLogout = {
+                            navController.navigate(Screen.Login.route) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
                     )
                 }
             }

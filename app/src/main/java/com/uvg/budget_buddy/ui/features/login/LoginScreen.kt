@@ -104,7 +104,7 @@ fun LoginScreen(
             Text("¿No tienes cuenta? Regístrate", color = LinkBlue)
         }
 
-        // Gráfica ELIMINADA (no se muestra nada aquí)
+
     }
 }
 

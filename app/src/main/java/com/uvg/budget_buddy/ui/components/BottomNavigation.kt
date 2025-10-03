@@ -14,7 +14,7 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun BottomNavigation(
     currentScreen: String,
-    onHomeClick: () -> Unit,               // <--- NUEVO
+    onHomeClick: () -> Unit,
     onAddIncomeClick: () -> Unit,
     onAddExpenseClick: () -> Unit
 ) {

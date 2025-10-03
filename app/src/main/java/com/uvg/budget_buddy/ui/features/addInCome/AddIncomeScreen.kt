@@ -21,7 +21,7 @@ import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 @Composable
 fun AddIncomeScreen(
     onSaveClick: () -> Unit,
-    onBackClick: () -> Unit // se mantiene la firma, pero NO se dibuja flecha
+    onBackClick: () -> Unit
 ) {
     var amount by remember { mutableStateOf("0.00") }
     var date by remember { mutableStateOf("September 11th, 2025") }
@@ -31,7 +31,7 @@ fun AddIncomeScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // **Header removido** (no hay flecha)
+
 
         Text("Añadir Ingreso", style = MaterialTheme.typography.titleLarge)
         Spacer(Modifier.height(24.dp))

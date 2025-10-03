@@ -23,7 +23,7 @@ import com.uvg.budget_buddy.ui.features.login.LoginScreen
 @Composable
 fun RegisterScreen(
     onRegisterClick: () -> Unit,
-    onBackClick: () -> Unit // se conserva la firma y tu navegación actual
+    onBackClick: () -> Unit
 ) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
@@ -35,7 +35,7 @@ fun RegisterScreen(
             .fillMaxSize()
             .padding(24.dp)
     ) {
-        // (Tu header con back si lo tienes; no lo toco)
+
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
