@@ -2,122 +2,158 @@ package com.uvg.budget_buddy.ui.features.home
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.uvg.budget_buddy.ui.theme.SoftBlue
 import com.uvg.budget_buddy.ui.theme.SoftGreen
 import com.uvg.budget_buddy.ui.theme.SoftRed
-//sera la pantalla principal que muestra resumen financiero
-data class FinancialData(val label: String, val amount: String, val color: Color)
+import kotlinx.coroutines.flow.StateFlow
+import java.text.DecimalFormat
+import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
+import kotlin.math.abs
+import kotlin.math.max
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.Divider
+
+
+
+data class FinancialData(val label: String, val amount: String, val color: androidx.compose.ui.graphics.Color)
 data class MonthlyPoint1(val month: String, val value: Float)
 
+//Datos Reales
 @Composable
 fun DashboardScreen(
-    onAddIncomeClick: () -> Unit, // Callback para navegar a AddIncome
-    onAddExpenseClick: () -> Unit// Callback para navegar a AddExpense
-) {
+    stateFlow: StateFlow<DashboardUiState>,
+    onAddIncomeClick: () -> Unit,
+    onAddExpenseClick: () -> Unit,
+    onOpenTxDetail: (Long) -> Unit
+)
+ {
+    val state by stateFlow.collectAsStateWithLifecycle()
+
+    val totalIncome = state.transactions.filter { it.amount > 0 }.sumOf { it.amount }
+    val totalExpenseAbs = state.transactions.filter { it.amount < 0 }.sumOf { -it.amount }
+    val balance = totalIncome - totalExpenseAbs
+    val df = remember { DecimalFormat("#,##0.00") }
+    fun q(v: Double) = "Q ${df.format(v)}"
+
     val financialData = listOf(
-        //datos quemados
-        FinancialData("Gastos",   "Q 348.28", SoftRed),    // rojo suave
-        FinancialData("Ingresos", "Q 1,200.00", SoftGreen),// verde suave
-        FinancialData("Balance",  "Q 850.75", SoftBlue)    // azul suave
-    )
-    val monthlyData = listOf(
-        MonthlyPoint1("Ene", 800f),
-        MonthlyPoint1("Mar", 850f),
-        MonthlyPoint1("May", 900f),
-        MonthlyPoint1("Jul", 950f)
+        FinancialData("Gastos", q(totalExpenseAbs), SoftRed),
+        FinancialData("Ingresos", q(totalIncome), SoftGreen),
+        FinancialData("Balance", q(balance), SoftBlue)
     )
 
-    Column(// Column para contener los elementos
+    val maxBarValue = max(1.0, max(totalIncome, max(totalExpenseAbs, abs(balance))))
+    fun barHeightFor(value: Double): Dp {
+        val minBar = 40.dp
+        val maxBar = 120.dp
+        val ratio = (value / maxBarValue).coerceIn(0.0, 1.0)
+        return (minBar + (maxBar - minBar) * ratio.toFloat())
+    }
+
+    val months = (5 downTo 0).map { LocalDate.now().minusMonths(it.toLong()) }
+    val monthlyData = months.map { m ->
+        val total = state.transactions.filter {
+            it.dateText.startsWith("${m.year}-${m.monthValue.toString().padStart(2, '0')}")
+        }.sumOf { it.amount }
+        val label = m.month.getDisplayName(TextStyle.SHORT, Locale("es")).replaceFirstChar { it.uppercase() }
+        MonthlyPoint1(label, total.toFloat())
+    }
+    val maxAbsMonthly = monthlyData.maxOfOrNull { abs(it.value) } ?: 1f
+
+    Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Row(// Row para contener el título y el icono
+        // ======= HEADER =======
+        Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text("Resumen Financiero", fontSize = 20.sp, fontWeight = FontWeight.Bold)
-            Icon(Icons.Default.Info, contentDescription = "Información", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+            Icon(Icons.Default.Info, contentDescription = "info", tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // Card 1: Gráfica de barras con resumen mensual
-        Card( // Card para el resumen mensual
+        // Grafica
+        Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+                .heightIn(min = 220.dp)
+                .padding(bottom = 12.dp),
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
-            Column(Modifier.padding(16.dp)) {
-                Text("Resumen mensual", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 16.dp))
+            Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                Text("Resumen mensual", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(16.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.Bottom
                 ) {
                     financialData.forEach { data ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Box(
                                 modifier = Modifier
-                                    .width(60.dp)
-                                    .height(
-                                        when (data.label) {
-                                            "Gastos" -> 80.dp
-                                            "Ingresos" -> 120.dp
-                                            "Balance" -> 100.dp
-                                            else -> 60.dp
-                                        }
-                                    )
-                                    .drawBehind { drawRect(color = data.color) }
+                                    .width(55.dp)
+                                    .height(barHeightFor(data.amount.filter { it.isDigit() || it == '.' }.toDoubleOrNull() ?: 0.0))
+                                    .drawBehind { drawRect(data.color, alpha = 0.85f) }
                             )
-                            Spacer(Modifier.height(8.dp))
-                            Text(text = data.amount, fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                            Text(text = data.label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Spacer(Modifier.height(6.dp))
+                            Text(data.amount, fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                            Text(data.label, fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
             }
         }
 
-        Spacer(Modifier.height(32.dp))
-        // Card 2: Gráfica de línea con tendencia
+        // Linea tendencia
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                .heightIn(min = 250.dp)
+                .padding(bottom = 12.dp),
+            colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 3.dp)
         ) {
             Column(Modifier.padding(16.dp)) {
-                Text("Tendencia de Balance", fontSize = 16.sp, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(bottom = 16.dp))
-                Box(modifier = Modifier.fillMaxWidth().height(120.dp)) {
+                Text("Tendencia de Balance", fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
+                Spacer(Modifier.height(8.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(150.dp)
+                        .padding(horizontal = 8.dp, vertical = 8.dp)
+                ) {
                     Canvas(modifier = Modifier.fillMaxSize()) {
-                        val w = size.width; val h = size.height
+                        val w = size.width
+                        val h = size.height
                         val pts = monthlyData.mapIndexed { i, p ->
                             Offset(
                                 x = (w / (monthlyData.size - 1)) * i,
-                                y = h - (p.value / 1000f) * h
+                                y = h - ((p.value / (maxAbsMonthly * 1.1f)) * h / 2f + h / 2f)
                             )
                         }
                         for (i in 0 until pts.size - 1) {
@@ -128,21 +164,56 @@ fun DashboardScreen(
                         }
                     }
                 }
-                // Etiquetas de meses debajo de la gráfica
+                Spacer(Modifier.height(6.dp))
                 Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     monthlyData.forEach { point ->
-                        Text(text = point.month, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(point.month, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             }
         }
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun DashboardScreenPreview() {
-    Budget_buddyTheme {
-        DashboardScreen({}, {})
+        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            "Últimos movimientos",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
+        )
+
+// Scroll la pantalla
+        state.transactions.forEach { tx ->
+            ListItem(
+                headlineContent = { Text(tx.description) },
+                supportingContent = { Text(tx.dateText) },
+                trailingContent = {
+                    val amountAbs = kotlin.math.abs(tx.amount)
+                    val sign = if (tx.amount >= 0) "" else "-"
+                    Text(
+                        "$sign Q ${df.format(amountAbs)}",
+                        color = if (tx.amount >= 0) SoftGreen else SoftRed,
+                        fontWeight = FontWeight.Bold
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onOpenTxDetail(tx.id) } // ← AQUÍ va el clickable
+                    .padding(horizontal = 4.dp)
+            )
+            Divider()
+        }
+
+        Spacer(Modifier.height(8.dp))
+
+        // ======= BOTONES =======
+        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            Button(onClick = onAddIncomeClick, modifier = Modifier.weight(1f)) {
+                Text("Añadir ingreso")
+            }
+            OutlinedButton(onClick = onAddExpenseClick, modifier = Modifier.weight(1f)) {
+                Text("Agregar gasto")
+            }
+        }
     }
 }

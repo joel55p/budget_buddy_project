@@ -1,87 +1,71 @@
 package com.uvg.budget_buddy.ui.features.addExpense
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.sp
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun AddExpenseScreen(
-    onSaveClick: () -> Unit,
-    onBackClick: () -> Unit
+    state: StateFlow<AddExpenseUiState>,
+    onEvent: (AddExpenseEvent) -> Unit,
+    onBackClick: () -> Unit,
+    onSaved: () -> Unit
 ) {
-    var amount by remember { mutableStateOf("0.00") }
-    var category by remember { mutableStateOf("Selecciona una categoría") }
-    var date by remember { mutableStateOf("September 11th, 2025") }
+    val ui by state.collectAsStateWithLifecycle()
+    val snack = remember { SnackbarHostState() }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp)
-    ) {
-
-
-        Text("Agregar Gasto", style = MaterialTheme.typography.titleLarge)
-        Spacer(Modifier.height(24.dp))
-
-        Text("Monto del Gasto", style = MaterialTheme.typography.bodyMedium)
-        OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        Text("Categoría", style = MaterialTheme.typography.bodyMedium)
-        OutlinedTextField(
-            value = category,
-            onValueChange = {  },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-
-        Spacer(Modifier.height(16.dp))
-
-        Text("Fecha del Gasto", style = MaterialTheme.typography.bodyMedium)
-        OutlinedTextField(
-            value = date,
-            onValueChange = { },
-            modifier = Modifier.fillMaxWidth(),
-            readOnly = true
-        )
-
-        Spacer(Modifier.weight(1f))
-
-        Button(
-            onClick = onSaveClick,
-            modifier = Modifier.fillMaxWidth(),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondary,
-                contentColor = MaterialTheme.colorScheme.onSecondary
-            )
-        ) {
-            Text("Guardar Gasto")
+    LaunchedEffect(ui.saved) {
+        if (ui.saved) {
+            snack.showSnackbar("Gasto guardado")
+            onEvent(AddExpenseEvent.SavedConsumed) // limpia y permite agregar otro
+            onSaved()
         }
     }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun AddExpenseScreenPreview() {
-    Budget_buddyTheme {
-        AddExpenseScreen({}, {})
+    Scaffold(snackbarHost = { SnackbarHost(snack) }) { inner ->
+        Column(Modifier.fillMaxSize().padding(inner).padding(24.dp)) {
+            Text("Agregar Gasto", style = MaterialTheme.typography.titleLarge)
+            Spacer(Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = ui.amount,
+                onValueChange = { onEvent(AddExpenseEvent.AmountChanged(it)) },
+                label = { Text("Monto del gasto") },
+                modifier = Modifier.fillMaxWidth(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
+            Spacer(Modifier.height(12.dp))
+            OutlinedTextField(
+                value = ui.description,
+                onValueChange = { onEvent(AddExpenseEvent.DescriptionChanged(it)) },
+                label = { Text("Descripción") },
+                modifier = Modifier.fillMaxWidth()
+            )
+
+            ui.error?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(it, color = MaterialTheme.colorScheme.error)
+            }
+
+            Spacer(Modifier.weight(1f))
+            Button(
+                onClick = { onEvent(AddExpenseEvent.Save) },
+                modifier = Modifier.fillMaxWidth(),
+                enabled = !ui.isSaving
+            ) {
+                if (ui.isSaving) CircularProgressIndicator(strokeWidth = 2.dp, modifier = Modifier.size(18.dp))
+                else Text("Guardar ")
+            }
+            Spacer(Modifier.height(8.dp))
+            OutlinedButton(onClick = onBackClick, modifier = Modifier.fillMaxWidth(), enabled = !ui.isSaving) {
+                Text("Volver")
+            }
+        }
     }
 }

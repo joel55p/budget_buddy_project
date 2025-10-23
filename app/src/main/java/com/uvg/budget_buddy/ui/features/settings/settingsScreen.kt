@@ -8,22 +8,24 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
-    onBackClick: () -> Unit, // Regresa a pantalla anterior
-    onLogout: () -> Unit // Cierra sesión
+    onBackClick: () -> Unit,
+    onLogout: () -> Unit,
+    simulateErrors: StateFlow<Boolean>,
+    onToggleSimulateErrors: (Boolean) -> Unit,
+    currentDarkMode: Boolean,
+    onToggleDarkMode: (Boolean) -> Unit
 ) {
-    // Estados locales para los switches
-    var showLogoutDialog by remember { mutableStateOf(false) }
+    val sim by simulateErrors.collectAsStateWithLifecycle()
     var notificationsEnabled by remember { mutableStateOf(true) }
-    var darkModeEnabled by remember { mutableStateOf(false) }
+    var showLogoutDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -33,59 +35,43 @@ fun SettingsScreen(
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
-    ) { innerPadding ->
+    ) { inner ->
         Column(
-            // seccion 1: cuenta
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
-                .padding(innerPadding)
+                .padding(inner)
                 .padding(16.dp)
         ) {
-            SectionTitle("Cuenta")
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
+            Text("Cuenta", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Card(Modifier.fillMaxWidth()) {
                 Column {
-                    SettingsItem(
+                    Item(
                         icon = Icons.Default.Person,
                         title = "Editar Perfil",
                         subtitle = "Actualiza tu información personal",
-                        onClick = { }
+                        onClick = { /* TODO: navegar a editar perfil */ }
                     )
-                    HorizontalDivider()
-                    SettingsItem(
+                    Divider()
+                    Item(
                         icon = Icons.Default.Lock,
                         title = "Cambiar Contraseña",
                         subtitle = "Actualiza tu contraseña de seguridad",
-                        onClick = { }
+                        onClick = { /* TODO: cambiar contraseña */ }
                     )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            SectionTitle("Preferencias") //va a ser la seccion 2
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
+            // ===== Preferencias =====
+            Text("Preferencias", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
+            Card(Modifier.fillMaxWidth()) {
                 Column {
                     SettingsSwitchItem(
                         icon = Icons.Default.Notifications,
@@ -94,83 +80,30 @@ fun SettingsScreen(
                         checked = notificationsEnabled,
                         onCheckedChange = { notificationsEnabled = it }
                     )
-                    HorizontalDivider()
+                    Divider()
                     SettingsSwitchItem(
-                        icon = Icons.Default.Star,
+                        icon = Icons.Default.DarkMode,
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
-                        checked = darkModeEnabled,
-                        onCheckedChange = { darkModeEnabled = it }
+                        checked = currentDarkMode,           // lee el valor real del VM
+                        onCheckedChange = onToggleDarkMode   // actualiza el VM -> cambia MaterialTheme
                     )
-                    HorizontalDivider()
-                    SettingsItem(
-                        icon = Icons.Default.Settings,
-                        title = "Moneda",
-                        subtitle = "Quetzales (Q)",
-                        onClick = { }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-
-            SectionTitle("Datos y Privacidad") //seccion 3
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column {
-                    SettingsItem(
-                        icon = Icons.Default.AccountBox,
-                        title = "Exportar Datos",
-                        subtitle = "Descarga tu información",
-                        onClick = { }
-                    )
-                    HorizontalDivider()
-                    SettingsItem(
-                        icon = Icons.Default.Delete,
-                        title = "Eliminar Cuenta",
-                        subtitle = "Borra tu cuenta permanentemente",
-                        onClick = { },
-                        textColor = MaterialTheme.colorScheme.error
+                    Divider()
+                    SettingsSwitchItem(
+                        icon = Icons.Default.ReportProblem,
+                        title = "Simular errores",
+                        subtitle = "Activa fallas de red simuladas",
+                        checked = sim,
+                        onCheckedChange = onToggleSimulateErrors
                     )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            SectionTitle("Información") //seccion 4
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column {
-                    SettingsItem(
-                        icon = Icons.Default.Info,
-                        title = "Acerca de",
-                        subtitle = "Versión 1.0.0",
-                        onClick = { }
-                    )
-                    HorizontalDivider()
-                    SettingsItem(
-                        icon = Icons.Default.Email,
-                        title = "Soporte",
-                        subtitle = "Contacta con nosotros",
-                        onClick = { }
-                    )
-                }
-            }
-
-            Spacer(Modifier.height(32.dp))
-            // Botón de cerrar sesión
+            // ===== Sesión =====
+            Text("Sesión", style = MaterialTheme.typography.titleMedium)
+            Spacer(Modifier.height(8.dp))
             Button(
                 onClick = { showLogoutDialog = true },
                 modifier = Modifier.fillMaxWidth(),
@@ -179,30 +112,22 @@ fun SettingsScreen(
                     contentColor = MaterialTheme.colorScheme.onError
                 )
             ) {
-                Icon(
-                    Icons.Default.ExitToApp,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
+                Icon(Icons.Default.ExitToApp, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
                 Text("Cerrar Sesión")
             }
         }
     }
-    // Diálogo de confirmación
+
+    // ===== Diálogo de logout =====
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             title = { Text("Cerrar Sesión") },
-            text = { Text("¿Estás seguro de que quieres cerrar sesión?") },
+            text = { Text("¿Seguro que deseas cerrar sesión?") },
             confirmButton = {
-                TextButton(
-                    onClick = {
-                        showLogoutDialog = false
-                        onLogout()// Ejecuta la acción de logout
-                    }
-                ) {
-                    Text("Confirmar", color = MaterialTheme.colorScheme.error)
+                TextButton(onClick = { showLogoutDialog = false; onLogout() }) {
+                    Text("Confirmar")
                 }
             },
             dismissButton = {
@@ -213,25 +138,26 @@ fun SettingsScreen(
         )
     }
 }
-// Componente para títulos de sección
-@Composable
-fun SectionTitle(text: String) {
-    Text(
-        text = text,
-        fontSize = 14.sp,
-        fontWeight = FontWeight.SemiBold,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(vertical = 8.dp, horizontal = 4.dp)
-    )
-}
+
 
 @Composable
-fun SettingsItem(// Componente clickeable para items de configuración
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+fun SettingsSwitchItem(
+    icon: ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit,
-    textColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    SwitchItem(icon, title, subtitle, checked, onCheckedChange)
+}
+
+
+@Composable
+private fun Item(
+    icon: ImageVector,
+    title: String,
+    subtitle: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -240,23 +166,13 @@ fun SettingsItem(// Componente clickeable para items de configuración
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
+        Icon(icon, contentDescription = null)
         Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = textColor
-            )
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall)
             Text(
                 subtitle,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
@@ -268,54 +184,31 @@ fun SettingsItem(// Componente clickeable para items de configuración
     }
 }
 
+
 @Composable
-fun SettingsSwitchItem(// Componente con switch para items toggleables
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
+private fun SwitchItem(
+    icon: ImageVector,
     title: String,
     subtitle: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Row(
-        modifier = Modifier
+        Modifier
             .fillMaxWidth()
             .padding(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
+        Icon(icon, contentDescription = null)
         Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                title,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium
-            )
+        Column(Modifier.weight(1f)) {
+            Text(title, style = MaterialTheme.typography.titleSmall)
             Text(
                 subtitle,
-                fontSize = 12.sp,
+                style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Switch(
-            // Switch interactivo
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun SettingsScreenPreview() {
-    Budget_buddyTheme {
-        SettingsScreen(
-            onBackClick = {},
-            onLogout = {}
-        )
+        Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }

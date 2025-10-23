@@ -5,238 +5,68 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 
-//Muestra información del perfil del usuario
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    onBackClick: () -> Unit, // Regresa a la pantalla anterior
-    onEditProfile: () -> Unit// Placeholder para editar perfil
-
+    onBackClick: () -> Unit,
+    onEditProfile: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text("Mi Perfil") },
                 navigationIcon = {
-                    // Botón de flecha para volver
                     IconButton(onClick = onBackClick) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimary,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                }
             )
         }
-    ) { innerPadding ->
+    ) { inner ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
+            Modifier.fillMaxSize().padding(inner).padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(Modifier.height(24.dp))
-
-            // Avatar circular con icono de usuario
             Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .clip(CircleShape) // Hace el box circular
+                modifier = Modifier.size(120.dp).clip(CircleShape)
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Default.Person,
-                    contentDescription = "Avatar", //avatar
-                    modifier = Modifier.size(64.dp),
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
-                )
+                Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(64.dp))
             }
-
             Spacer(Modifier.height(16.dp))
-
-            Text( // Nombre del usuario
-                text = "Juan Pérez",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-
-            Text( //info
-                text = "Miembro desde Sep 2025",
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            // Información del perfil
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        "Información Personal",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    ProfileInfoItem(
-                        icon = Icons.Default.Email,
-                        label = "Email",
-                        value = "juan.perez@email.com"
-                    )
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-
-                    ProfileInfoItem(
-                        icon = Icons.Default.Lock,
-                        label = "Contraseña",
-                        value = "••••••••"
-                    )
-                }
-            }
+            Text("Juan Pérez", fontSize = 22.sp)
 
             Spacer(Modifier.height(24.dp))
-
-            // Estadísticas rápidas
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp)
-                ) {
-                    Text(
-                        "Resumen de Actividad",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.padding(bottom = 16.dp)
+            Card(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
+                        headlineContent = { Text("Email") },
+                        supportingContent = { Text("juan.perez@email.com") }
                     )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
-                    ) {
-                        StatItem("42", "Gastos")
-                        VerticalDivider(modifier = Modifier.height(50.dp))
-                        StatItem("18", "Ingresos")
-                        VerticalDivider(modifier = Modifier.height(50.dp))
-                        StatItem("3", "Meses")
-                    }
+                    Divider()
+                    ListItem(
+                        leadingContent = { Icon(Icons.Default.Lock, contentDescription = null) },
+                        headlineContent = { Text("Contraseña") },
+                        supportingContent = { Text("••••••••") }
+                    )
                 }
             }
 
             Spacer(Modifier.weight(1f))
-
-            // Botón de editar perfil que aun no hace nada
-            Button(
-                onClick = onEditProfile,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary,
-                    contentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            ) {
-                Icon(
-                    Icons.Default.Edit,
-                    contentDescription = null,
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(Modifier.width(8.dp))
-                Text("Editar Perfil")
-            }
+            Button(onClick = onEditProfile, modifier = Modifier.fillMaxWidth()) { Text("Editar Perfil") }
         }
-    }
-}
-
-@Composable
-fun ProfileInfoItem( // Componente reutilizable para mostrar información
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    value: String
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
-        Spacer(Modifier.width(16.dp))
-        Column {
-            Text(
-                label,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Text(
-                value,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-    }
-}
-
-@Composable
-fun StatItem(value: String, label: String) {// Componente para mostrar estadísticas
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(
-            value,
-            fontSize = 24.sp,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
-        )
-        Text(
-            label,
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun ProfileScreenPreview() {
-    Budget_buddyTheme {
-        ProfileScreen(
-            onBackClick = {},
-            onEditProfile = {}
-        )
     }
 }
