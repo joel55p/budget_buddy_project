@@ -23,7 +23,6 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginClick = {
-                    // Ir a onboarding y limpiar auth del backstack
                     nav.navigate(Screen.Onboarding.route)
                 },
                 onRegisterClick = { nav.navigate(Screen.Register.route) }
@@ -40,7 +39,6 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onStartClick = {
-                    // Entra al app graph y limpia auth
                     nav.navigate("app") {
                         popUpTo("auth") { inclusive = true }
                     }
@@ -57,8 +55,8 @@ fun NavGraphBuilder.appGraph(
     addIncomeVm: AddIncomeViewModel,
     addExpenseVm: AddExpenseViewModel,
     settingsVm: SettingsViewModel,
-    isDark: Boolean,                       // ← dark mode actual
-    onToggleDark: (Boolean) -> Unit        // ← callback para cambiarlo
+    isDark: Boolean,
+    onToggleDark: (Boolean) -> Unit
 ) {
     navigation(startDestination = Screen.Dashboard.route, route = "app") {
 
@@ -76,7 +74,7 @@ fun NavGraphBuilder.appGraph(
                 state = addIncomeVm.state,
                 onEvent = addIncomeVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = { /* nos quedamos para agregar más */ }
+                onSaved = { }
             )
         }
 
@@ -85,14 +83,14 @@ fun NavGraphBuilder.appGraph(
                 state = addExpenseVm.state,
                 onEvent = addExpenseVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = { /* nos quedamos para agregar más */ }
+                onSaved = { }
             )
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onBackClick = { nav.popBackStack() },
-                onEditProfile = { /* TODO */ }
+                onEditProfile = { }
             )
         }
 
@@ -106,8 +104,8 @@ fun NavGraphBuilder.appGraph(
                 },
                 simulateErrors = settingsVm.simulateErrors,
                 onToggleSimulateErrors = settingsVm::toggleSimulateErrors,
-                currentDarkMode = isDark,            // ✅ se pasa al Settings
-                onToggleDarkMode = onToggleDark      // ✅ y su callback también
+                currentDarkMode = isDark,
+                onToggleDarkMode = onToggleDark
             )
         }
     }

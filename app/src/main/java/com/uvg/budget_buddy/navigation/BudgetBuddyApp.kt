@@ -22,8 +22,6 @@ import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
-import androidx.navigation.compose.composable
-import com.uvg.budget_buddy.ui.features.onBoarding.OnboardingScreen
 import com.uvg.budget_buddy.ui.theme.ThemeViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -33,8 +31,9 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     val backEntry by nav.currentBackStackEntryAsState()
     val route = backEntry?.destination?.route
     val tabRoutes = listOf(Screen.Dashboard.route, Screen.AddIncome.route, Screen.AddExpense.route)
-    val repo = remember { FakeBudgetRepository()
-    }
+
+    val repo = remember { FakeBudgetRepository() }
+
     val dashboardVm: DashboardViewModel = viewModel(
         factory = viewModelFactory { initializer { DashboardViewModel(repo) } }
     )
@@ -50,14 +49,22 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val isDark by themeVm.isDarkMode.collectAsState()   // ← lee estado actual
+
+    // Observa el estado del tema desde el ViewModel
+    val isDark by themeVm.isDarkMode.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
-                onProfile = { scope.launch { drawerState.close() }; nav.navigate(Screen.Profile.route) },
-                onSettings = { scope.launch { drawerState.close() }; nav.navigate(Screen.Settings.route) },
+                onProfile = {
+                    scope.launch { drawerState.close() }
+                    nav.navigate(Screen.Profile.route)
+                },
+                onSettings = {
+                    scope.launch { drawerState.close() }
+                    nav.navigate(Screen.Settings.route)
+                },
                 onLogout = {
                     scope.launch { drawerState.close() }
                     nav.navigate("auth") { popUpTo("app") { inclusive = true } }
@@ -117,7 +124,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     settingsVm = settingsVm,
                     isDark = isDark,
                     onToggleDark = themeVm::setTheme
-
                 )
             }
         }

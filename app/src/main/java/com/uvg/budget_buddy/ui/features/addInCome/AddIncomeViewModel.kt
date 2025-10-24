@@ -49,9 +49,9 @@ class AddIncomeViewModel(private val repo: BudgetRepository) : ViewModel() {
                 if (result.isSuccess)
                     it.copy(
                         isSaving = false,
-                        saved = true,            // dispara snackbar si lo usas
-                        amount = "",             // <-- limpia aquí
-                        description = ""         // <-- limpia aquí
+                        saved = true,
+                        amount = "",
+                        description = ""
                     )
                 else it.copy(isSaving = false, error = result.exceptionOrNull()?.message ?: "Error al guardar")
             }

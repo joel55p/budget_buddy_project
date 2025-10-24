@@ -21,7 +21,7 @@ fun AppDrawer(
         NavigationDrawerItem(label = { Text("Perfil") }, selected = false, onClick = onProfile)
         NavigationDrawerItem(label = { Text("Configuración") }, selected = false, onClick = onSettings)
 
-        Divider(modifier = Modifier.padding(vertical = 8.dp))
+        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
         NavigationDrawerItem(label = { Text("Cerrar sesión") }, selected = false, onClick = onLogout)
     }
