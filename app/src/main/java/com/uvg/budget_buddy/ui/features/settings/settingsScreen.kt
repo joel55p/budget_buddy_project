@@ -11,14 +11,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import kotlinx.coroutines.flow.StateFlow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     onBackClick: () -> Unit,
     onLogout: () -> Unit,
-    simulateErrors: StateFlow<Boolean>,
+    simulateErrors: kotlinx.coroutines.flow.StateFlow<Boolean>,
     onToggleSimulateErrors: (Boolean) -> Unit,
     currentDarkMode: Boolean,
     onToggleDarkMode: (Boolean) -> Unit
@@ -56,7 +55,7 @@ fun SettingsScreen(
                         subtitle = "Actualiza tu información personal",
                         onClick = { /* TODO: navegar a editar perfil */ }
                     )
-                    Divider()
+                    HorizontalDivider()
                     Item(
                         icon = Icons.Default.Lock,
                         title = "Cambiar Contraseña",
@@ -73,23 +72,27 @@ fun SettingsScreen(
             Spacer(Modifier.height(8.dp))
             Card(Modifier.fillMaxWidth()) {
                 Column {
-                    SettingsSwitchItem(
+                    SwitchItem(
                         icon = Icons.Default.Notifications,
                         title = "Notificaciones",
                         subtitle = "Recibe alertas y recordatorios",
                         checked = notificationsEnabled,
                         onCheckedChange = { notificationsEnabled = it }
                     )
-                    Divider()
-                    SettingsSwitchItem(
+                    HorizontalDivider()
+
+                    // MODO OSCURO - Ahora con el estado correcto
+                    SwitchItem(
                         icon = Icons.Default.DarkMode,
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
-                        checked = currentDarkMode,           // lee el valor real
-                        onCheckedChange = onToggleDarkMode
+                        checked = currentDarkMode,
+                        onCheckedChange = { newValue ->
+                            onToggleDarkMode(newValue)
+                        }
                     )
-                    Divider()
-                    SettingsSwitchItem(
+                    HorizontalDivider()
+                    SwitchItem(
                         icon = Icons.Default.ReportProblem,
                         title = "Simular errores",
                         subtitle = "Activa fallas de red simuladas",
@@ -139,20 +142,6 @@ fun SettingsScreen(
     }
 }
 
-
-@Composable
-fun SettingsSwitchItem(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    // Esta función solo pasa los valores a SwitchItem
-    SwitchItem(icon, title, subtitle, checked, onCheckedChange)
-}
-
-
 @Composable
 private fun Item(
     icon: ImageVector,
@@ -185,7 +174,6 @@ private fun Item(
     }
 }
 
-
 @Composable
 private fun SwitchItem(
     icon: ImageVector,
@@ -210,7 +198,9 @@ private fun SwitchItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
+        Switch(
+            checked = checked,
+            onCheckedChange = onCheckedChange
+        )
     }
 }

@@ -15,7 +15,6 @@ import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseViewModel
 import com.uvg.budget_buddy.ui.features.profile.ProfileScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
-import com.uvg.budget_buddy.ui.features.transactionDetail.TransactionDetailScreen
 
 /** Graph de autenticación */
 fun NavGraphBuilder.authGraph(nav: NavHostController) {
@@ -49,7 +48,7 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
     }
 }
 
-/** Graph principal de la app con rutas tipadas */
+/** Graph principal de la app */
 fun NavGraphBuilder.appGraph(
     nav: NavHostController,
     dashboardVm: DashboardViewModel,
@@ -66,9 +65,7 @@ fun NavGraphBuilder.appGraph(
                 stateFlow = dashboardVm.state,
                 onAddIncomeClick = { nav.navigate(Screen.AddIncome.route) },
                 onAddExpenseClick = { nav.navigate(Screen.AddExpense.route) },
-                onOpenTxDetail = { id ->
-                    nav.navigate("${Screen.TransactionDetail.route}/$id")
-                }
+                onOpenTxDetail = { id -> nav.navigate("tx_detail/$id") }
             )
         }
 
@@ -77,7 +74,7 @@ fun NavGraphBuilder.appGraph(
                 state = addIncomeVm.state,
                 onEvent = addIncomeVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = {  }
+                onSaved = { }
             )
         }
 
@@ -86,14 +83,14 @@ fun NavGraphBuilder.appGraph(
                 state = addExpenseVm.state,
                 onEvent = addExpenseVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = {  }
+                onSaved = { }
             )
         }
 
         composable(Screen.Profile.route) {
             ProfileScreen(
                 onBackClick = { nav.popBackStack() },
-                onEditProfile = { /* TODO */ }
+                onEditProfile = { }
             )
         }
 
@@ -109,24 +106,6 @@ fun NavGraphBuilder.appGraph(
                 onToggleSimulateErrors = settingsVm::toggleSimulateErrors,
                 currentDarkMode = isDark,
                 onToggleDarkMode = onToggleDark
-            )
-        }
-
-        // nueva ruta con argumento tipado
-        composable(
-            route = "${Screen.TransactionDetail.route}/{txId}",
-            arguments = listOf(
-                navArgument("txId") {
-                    type = NavType.LongType
-                    defaultValue = -1L
-                }
-            )
-        ) { backStackEntry ->
-            val txId = backStackEntry.arguments?.getLong("txId") ?: -1L
-            TransactionDetailScreen(
-                transactionId = txId,
-                dashboardVm = dashboardVm,
-                onBackClick = { nav.popBackStack() }
             )
         }
     }
