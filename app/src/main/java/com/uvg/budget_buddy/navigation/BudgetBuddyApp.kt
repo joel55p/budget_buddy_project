@@ -116,7 +116,7 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     addExpenseVm = addExpenseVm,
                     settingsVm = settingsVm,
                     isDark = isDark,
-                    onToggleDark = themeVm::setTheme
+                    onToggleDark = themeVm::setTheme // se cambio ya que me estaba dando error con el modo oscuro
 
                 )
             }

@@ -56,7 +56,7 @@ fun SettingsScreen(
                         subtitle = "Actualiza tu información personal",
                         onClick = { /* TODO: navegar a editar perfil */ }
                     )
-                    HorizontalDivider()
+                    Divider()
                     Item(
                         icon = Icons.Default.Lock,
                         title = "Cambiar Contraseña",
@@ -80,15 +80,15 @@ fun SettingsScreen(
                         checked = notificationsEnabled,
                         onCheckedChange = { notificationsEnabled = it }
                     )
-                    HorizontalDivider()
+                    Divider()
                     SettingsSwitchItem(
                         icon = Icons.Default.DarkMode,
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
-                        checked = currentDarkMode,
-                        onCheckedChange = onToggleDarkMode
+                        checked = currentDarkMode,           // lee el valor real
+                        onCheckedChange = onToggleDarkMode   // <-- ¡LA LÍNEA IMPORTANTE!
                     )
-                    HorizontalDivider()
+                    Divider()
                     SettingsSwitchItem(
                         icon = Icons.Default.ReportProblem,
                         title = "Simular errores",
@@ -148,6 +148,7 @@ fun SettingsSwitchItem(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
+    // Esta función solo pasa los valores a SwitchItem
     SwitchItem(icon, title, subtitle, checked, onCheckedChange)
 }
 
@@ -209,6 +210,8 @@ private fun SwitchItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+        // Aquí es donde realmente se usa el callback.
+        // onCheckedChange es la función que viene desde el ViewModel
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }
