@@ -15,7 +15,7 @@ fun AddIncomeScreen(
     state: StateFlow<AddIncomeUiState>,
     onEvent: (AddIncomeEvent) -> Unit,
     onBackClick: () -> Unit,
-    onSaved: () -> Unit // se seguirá llamando, pero no navega (ver NavGraphs)
+    onSaved: () -> Unit // se seguirá llamando, pero no navega
 ) {
     val ui by state.collectAsStateWithLifecycle()
     val snack = remember { SnackbarHostState() }

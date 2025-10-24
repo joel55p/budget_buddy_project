@@ -86,7 +86,7 @@ fun SettingsScreen(
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
                         checked = currentDarkMode,           // lee el valor real
-                        onCheckedChange = onToggleDarkMode   // <-- ¡LA LÍNEA IMPORTANTE!
+                        onCheckedChange = onToggleDarkMode
                     )
                     Divider()
                     SettingsSwitchItem(
@@ -210,8 +210,7 @@ private fun SwitchItem(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        // Aquí es donde realmente se usa el callback.
-        // onCheckedChange es la función que viene desde el ViewModel
+
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
 }

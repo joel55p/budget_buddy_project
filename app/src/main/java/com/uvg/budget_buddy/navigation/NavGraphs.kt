@@ -77,7 +77,7 @@ fun NavGraphBuilder.appGraph(
                 state = addIncomeVm.state,
                 onEvent = addIncomeVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = { /* nos quedamos para agregar más */ }
+                onSaved = {  }
             )
         }
 
@@ -86,7 +86,7 @@ fun NavGraphBuilder.appGraph(
                 state = addExpenseVm.state,
                 onEvent = addExpenseVm::onEvent,
                 onBackClick = { nav.popBackStack() },
-                onSaved = { /* nos quedamos para agregar más */ }
+                onSaved = {  }
             )
         }
 
@@ -112,7 +112,7 @@ fun NavGraphBuilder.appGraph(
             )
         }
 
-        // ✅ NUEVA RUTA CON ARGUMENTO TIPADO
+        // nueva ruta con argumento tipado
         composable(
             route = "${Screen.TransactionDetail.route}/{txId}",
             arguments = listOf(
