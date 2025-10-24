@@ -1,11 +1,14 @@
 package com.uvg.budget_buddy.ui.features.home
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -27,26 +30,94 @@ import java.time.format.TextStyle
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
-import androidx.compose.foundation.clickable
-import androidx.compose.material3.ListItem
-import androidx.compose.material3.Divider
-
-
 
 data class FinancialData(val label: String, val amount: String, val color: androidx.compose.ui.graphics.Color)
 data class MonthlyPoint1(val month: String, val value: Float)
 
-//Datos Reales
 @Composable
 fun DashboardScreen(
     stateFlow: StateFlow<DashboardUiState>,
     onAddIncomeClick: () -> Unit,
     onAddExpenseClick: () -> Unit,
     onOpenTxDetail: (Long) -> Unit
-)
- {
+) {
     val state by stateFlow.collectAsStateWithLifecycle()
 
+    Box(modifier = Modifier.fillMaxSize()) {
+        when {
+            state.isLoading -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator()
+                        Spacer(Modifier.height(16.dp))
+                        Text("Cargando datos...", style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+
+            state.error != null -> {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        modifier = Modifier.padding(24.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Icon(
+                            Icons.Default.Warning,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        Text(
+                            "Error al cargar datos",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text(
+                            state.error ?: "Error desconocido",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(Modifier.height(24.dp))
+                        Button(
+                            onClick = { /* Retry logic */ }
+                        ) {
+                            Icon(Icons.Default.Refresh, contentDescription = null)
+                            Spacer(Modifier.width(8.dp))
+                            Text("Reintentar")
+                        }
+                    }
+                }
+            }
+
+            else -> {
+                DashboardContent(
+                    state = state,
+                    onAddIncomeClick = onAddIncomeClick,
+                    onAddExpenseClick = onAddExpenseClick,
+                    onOpenTxDetail = onOpenTxDetail
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun DashboardContent(
+    state: DashboardUiState,
+    onAddIncomeClick: () -> Unit,
+    onAddExpenseClick: () -> Unit,
+    onOpenTxDetail: (Long) -> Unit
+) {
     val totalIncome = state.transactions.filter { it.amount > 0 }.sumOf { it.amount }
     val totalExpenseAbs = state.transactions.filter { it.amount < 0 }.sumOf { -it.amount }
     val balance = totalIncome - totalExpenseAbs
@@ -83,7 +154,6 @@ fun DashboardScreen(
             .padding(horizontal = 16.dp, vertical = 8.dp)
             .verticalScroll(rememberScrollState())
     ) {
-        // ======= HEADER =======
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -95,7 +165,6 @@ fun DashboardScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // Grafica
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -113,7 +182,10 @@ fun DashboardScreen(
                     verticalAlignment = Alignment.Bottom
                 ) {
                     financialData.forEach { data ->
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(horizontal = 4.dp)
+                        ) {
                             Box(
                                 modifier = Modifier
                                     .width(55.dp)
@@ -129,7 +201,6 @@ fun DashboardScreen(
             }
         }
 
-        // Linea tendencia
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,15 +236,22 @@ fun DashboardScreen(
                     }
                 }
                 Spacer(Modifier.height(6.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
                     monthlyData.forEach { point ->
-                        Text(point.month, fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            point.month,
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
                     }
                 }
             }
         }
 
-        Spacer(Modifier.height(8.dp))
         Spacer(Modifier.height(16.dp))
 
         Text(
@@ -182,31 +260,53 @@ fun DashboardScreen(
             modifier = Modifier.padding(start = 4.dp, bottom = 8.dp)
         )
 
-// Scroll la pantalla
-        state.transactions.forEach { tx ->
-            ListItem(
-                headlineContent = { Text(tx.description) },
-                supportingContent = { Text(tx.dateText) },
-                trailingContent = {
-                    val amountAbs = kotlin.math.abs(tx.amount)
-                    val sign = if (tx.amount >= 0) "" else "-"
+        if (state.transactions.isEmpty()) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Column(
+                    modifier = Modifier.padding(24.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     Text(
-                        "$sign Q ${df.format(amountAbs)}",
-                        color = if (tx.amount >= 0) SoftGreen else SoftRed,
-                        fontWeight = FontWeight.Bold
+                        "No hay transacciones aún",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { onOpenTxDetail(tx.id) } // ← AQUÍ va el clickable
-                    .padding(horizontal = 4.dp)
-            )
-            Divider()
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        "Agrega tu primer ingreso o gasto",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        } else {
+            state.transactions.forEach { tx ->
+                ListItem(
+                    headlineContent = { Text(tx.description) },
+                    supportingContent = { Text(tx.dateText) },
+                    trailingContent = {
+                        val amountAbs = kotlin.math.abs(tx.amount)
+                        val sign = if (tx.amount >= 0) "" else "-"
+                        Text(
+                            "$sign Q ${df.format(amountAbs)}",
+                            color = if (tx.amount >= 0) SoftGreen else SoftRed,
+                            fontWeight = FontWeight.Bold
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onOpenTxDetail(tx.id) }
+                        .padding(horizontal = 4.dp)
+                )
+                HorizontalDivider()
+            }
         }
 
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(16.dp))
 
-        // ======= BOTONES =======
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             Button(onClick = onAddIncomeClick, modifier = Modifier.weight(1f)) {
                 Text("Añadir ingreso")

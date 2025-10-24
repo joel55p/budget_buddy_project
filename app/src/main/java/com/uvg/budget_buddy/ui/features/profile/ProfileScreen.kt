@@ -56,7 +56,7 @@ fun ProfileScreen(
                         headlineContent = { Text("Email") },
                         supportingContent = { Text("juan.perez@email.com") }
                     )
-                    Divider()
+                    HorizontalDivider()
                     ListItem(
                         leadingContent = { Icon(Icons.Default.Lock, contentDescription = null) },
                         headlineContent = { Text("Contraseña") },

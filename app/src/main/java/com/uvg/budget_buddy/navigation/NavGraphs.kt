@@ -15,6 +15,7 @@ import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseViewModel
 import com.uvg.budget_buddy.ui.features.profile.ProfileScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
+import com.uvg.budget_buddy.ui.features.transactionDetail.TransactionDetailScreen
 
 /** Graph de autenticación */
 fun NavGraphBuilder.authGraph(nav: NavHostController) {
@@ -23,7 +24,6 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
         composable(Screen.Login.route) {
             LoginScreen(
                 onLoginClick = {
-                    // Ir a onboarding y limpiar auth del backstack
                     nav.navigate(Screen.Onboarding.route)
                 },
                 onRegisterClick = { nav.navigate(Screen.Register.route) }
@@ -40,7 +40,6 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
         composable(Screen.Onboarding.route) {
             OnboardingScreen(
                 onStartClick = {
-                    // Entra al app graph y limpia auth
                     nav.navigate("app") {
                         popUpTo("auth") { inclusive = true }
                     }
@@ -50,15 +49,15 @@ fun NavGraphBuilder.authGraph(nav: NavHostController) {
     }
 }
 
-/** Graph principal de la app */
+/** Graph principal de la app con rutas tipadas */
 fun NavGraphBuilder.appGraph(
     nav: NavHostController,
     dashboardVm: DashboardViewModel,
     addIncomeVm: AddIncomeViewModel,
     addExpenseVm: AddExpenseViewModel,
     settingsVm: SettingsViewModel,
-    isDark: Boolean,                       // ← dark mode actual
-    onToggleDark: (Boolean) -> Unit        // ← callback para cambiarlo
+    isDark: Boolean,
+    onToggleDark: (Boolean) -> Unit
 ) {
     navigation(startDestination = Screen.Dashboard.route, route = "app") {
 
@@ -67,7 +66,9 @@ fun NavGraphBuilder.appGraph(
                 stateFlow = dashboardVm.state,
                 onAddIncomeClick = { nav.navigate(Screen.AddIncome.route) },
                 onAddExpenseClick = { nav.navigate(Screen.AddExpense.route) },
-                onOpenTxDetail = { id -> nav.navigate("tx_detail/$id") }
+                onOpenTxDetail = { id ->
+                    nav.navigate("${Screen.TransactionDetail.route}/$id")
+                }
             )
         }
 
@@ -106,8 +107,26 @@ fun NavGraphBuilder.appGraph(
                 },
                 simulateErrors = settingsVm.simulateErrors,
                 onToggleSimulateErrors = settingsVm::toggleSimulateErrors,
-                currentDarkMode = isDark,            // ✅ se pasa al Settings
-                onToggleDarkMode = onToggleDark      // ✅ y su callback también
+                currentDarkMode = isDark,
+                onToggleDarkMode = onToggleDark
+            )
+        }
+
+        // ✅ NUEVA RUTA CON ARGUMENTO TIPADO
+        composable(
+            route = "${Screen.TransactionDetail.route}/{txId}",
+            arguments = listOf(
+                navArgument("txId") {
+                    type = NavType.LongType
+                    defaultValue = -1L
+                }
+            )
+        ) { backStackEntry ->
+            val txId = backStackEntry.arguments?.getLong("txId") ?: -1L
+            TransactionDetailScreen(
+                transactionId = txId,
+                dashboardVm = dashboardVm,
+                onBackClick = { nav.popBackStack() }
             )
         }
     }

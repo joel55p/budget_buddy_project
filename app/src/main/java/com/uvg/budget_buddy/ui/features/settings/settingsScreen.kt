@@ -56,7 +56,7 @@ fun SettingsScreen(
                         subtitle = "Actualiza tu información personal",
                         onClick = { /* TODO: navegar a editar perfil */ }
                     )
-                    Divider()
+                    HorizontalDivider()
                     Item(
                         icon = Icons.Default.Lock,
                         title = "Cambiar Contraseña",
@@ -80,15 +80,15 @@ fun SettingsScreen(
                         checked = notificationsEnabled,
                         onCheckedChange = { notificationsEnabled = it }
                     )
-                    Divider()
+                    HorizontalDivider()
                     SettingsSwitchItem(
                         icon = Icons.Default.DarkMode,
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
-                        checked = currentDarkMode,           // lee el valor real del VM
-                        onCheckedChange = onToggleDarkMode   // actualiza el VM -> cambia MaterialTheme
+                        checked = currentDarkMode,
+                        onCheckedChange = onToggleDarkMode
                     )
-                    Divider()
+                    HorizontalDivider()
                     SettingsSwitchItem(
                         icon = Icons.Default.ReportProblem,
                         title = "Simular errores",
