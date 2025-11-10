@@ -25,7 +25,7 @@ sealed interface DashboardEvent {
 
 class DashboardViewModel(
     private val repo: BudgetRepository,
-    private val authRepository: AuthRepository  // <- NUEVO parámetro
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(DashboardUiState(isLoading = true))

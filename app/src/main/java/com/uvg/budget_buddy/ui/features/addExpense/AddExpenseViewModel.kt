@@ -20,7 +20,7 @@ sealed interface AddExpenseEvent {
     data class AmountChanged(val value: String) : AddExpenseEvent
     data class DescriptionChanged(val value: String) : AddExpenseEvent
     data object Save : AddExpenseEvent
-    data object SavedConsumed : AddExpenseEvent // <--- NUEVO
+    data object SavedConsumed : AddExpenseEvent
 }
 
 class AddExpenseViewModel(private val repo: BudgetRepository) : ViewModel() {

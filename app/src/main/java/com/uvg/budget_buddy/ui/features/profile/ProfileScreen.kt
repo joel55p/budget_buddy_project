@@ -21,11 +21,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel,  // ← AGREGADO
+    viewModel: ProfileViewModel,
     onBackClick: () -> Unit,
     onEditProfile: () -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()  // ← AGREGADO
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
@@ -66,7 +66,7 @@ fun ProfileScreen(
                     Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(64.dp))
                 }
                 Spacer(Modifier.height(16.dp))
-                Text(state.name, fontSize = 22.sp)  // ← CAMBIÓ de hardcoded a state.name
+                Text(state.name, fontSize = 22.sp)
 
                 Spacer(Modifier.height(24.dp))
                 Card(Modifier.fillMaxWidth()) {
@@ -74,7 +74,7 @@ fun ProfileScreen(
                         ListItem(
                             leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
                             headlineContent = { Text("Email") },
-                            supportingContent = { Text(state.email) }  // ← CAMBIÓ a state.email
+                            supportingContent = { Text(state.email) }
                         )
                         HorizontalDivider()
                         ListItem(
@@ -85,7 +85,7 @@ fun ProfileScreen(
                     }
                 }
 
-                // ← AGREGADO manejo de errores
+                //  manejo de errores
                 state.error?.let { error ->
                     Spacer(Modifier.height(16.dp))
                     Text(

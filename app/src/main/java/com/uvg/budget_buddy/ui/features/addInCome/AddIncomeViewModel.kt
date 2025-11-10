@@ -20,7 +20,7 @@ sealed interface AddIncomeEvent {
     data class AmountChanged(val value: String) : AddIncomeEvent
     data class DescriptionChanged(val value: String) : AddIncomeEvent
     data object Save : AddIncomeEvent
-    data object SavedConsumed : AddIncomeEvent // <--- NUEVO
+    data object SavedConsumed : AddIncomeEvent
 }
 
 class AddIncomeViewModel(private val repo: BudgetRepository) : ViewModel() {
