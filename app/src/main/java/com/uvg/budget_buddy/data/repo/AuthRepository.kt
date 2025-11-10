@@ -25,6 +25,9 @@ class AuthRepository(
         }
         auth.addAuthStateListener(listener)
 
+        // Enviar estado actual inmediatamente
+        trySend(auth.currentUser)
+
         awaitClose { auth.removeAuthStateListener(listener) }
     }
 
@@ -32,6 +35,7 @@ class AuthRepository(
         return try {
             val result = auth.createUserWithEmailAndPassword(email, password).await()
             result.user?.let { user ->
+                // Guardar datos del usuario en preferencias
                 userPreferences.saveUserData(user.uid, email)
                 AuthResult.Success(user)
             } ?: AuthResult.Error("Error al crear usuario")
@@ -44,6 +48,7 @@ class AuthRepository(
         return try {
             val result = auth.signInWithEmailAndPassword(email, password).await()
             result.user?.let { user ->
+                // Guardar datos del usuario en preferencias
                 userPreferences.saveUserData(user.uid, email)
                 AuthResult.Success(user)
             } ?: AuthResult.Error("Error al iniciar sesión")

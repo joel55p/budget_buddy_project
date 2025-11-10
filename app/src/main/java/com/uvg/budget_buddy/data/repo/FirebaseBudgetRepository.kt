@@ -54,7 +54,7 @@ class FirebaseBudgetRepository(
                                     )
                                 }
                             }
-                            trySend(Resource.Success(transactions))
+                            trySend(Resource.Success(transactions as List<Transaction>))
                         } catch (e: Exception) {
                             trySend(Resource.Error(e.message ?: "Error al procesar datos"))
                         }
@@ -71,11 +71,24 @@ class FirebaseBudgetRepository(
             awaitClose {
                 getTransactionsRef(userId).removeEventListener(listener)
             }
+        }.onStart {
+            // Cargar datos locales primero para mostrar algo mientras se conecta a Firebase
+            try {
+                val entities = transactionDao.getTransactionsByUser(userId)
+                if (entities.isNotEmpty()) {
+                    emit(Resource.Success(entities.map { it.toTransaction() }))
+                }
+            } catch (e: Exception) {
+                // Si falla, continuará con Firebase
+            }
         }.catch { e ->
-            // Si falla Firebase, usar datos locales
-            emit(Resource.Error("Error de conexión: ${e.message}"))
+            // Si falla Firebase, intentar cargar datos locales como fallback
             val entities = transactionDao.getTransactionsByUser(userId)
-            emit(Resource.Success(entities.map { it.toTransaction() }))
+            if (entities.isNotEmpty()) {
+                emit(Resource.Success(entities.map { it.toTransaction() }))
+            } else {
+                emit(Resource.Error("Error de conexión y sin datos locales: ${e.message}"))
+            }
         }
     }
 

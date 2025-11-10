@@ -89,13 +89,25 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     val scope = rememberCoroutineScope()
     val isDark by themeVm.isDarkMode.collectAsState()
 
-    // Observar estado de autenticación
-    val isLoggedIn by userPreferences.isLoggedIn.collectAsState(initial = false)
+    // Observar estado de autenticación desde Firebase directamente
+    val authState by authRepository.observeAuthState().collectAsState(initial = null)
+    val isLoggedIn = authState != null
 
-    LaunchedEffect(isLoggedIn) {
-        if (!isLoggedIn && route !in listOf(Screen.Login.route, Screen.Register.route)) {
-            nav.navigate("auth") {
-                popUpTo(0) { inclusive = true }
+    // Navegar automáticamente según el estado de autenticación
+    LaunchedEffect(isLoggedIn, route) {
+        if (isLoggedIn) {
+            // Usuario autenticado
+            if (route == Screen.Login.route || route == Screen.Register.route || route == "auth") {
+                nav.navigate("app") {
+                    popUpTo(0) { inclusive = true }
+                }
+            }
+        } else {
+            // Usuario no autenticado
+            if (route != Screen.Login.route && route != Screen.Register.route && route != "auth") {
+                nav.navigate("auth") {
+                    popUpTo(0) { inclusive = true }
+                }
             }
         }
     }
@@ -116,9 +128,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     scope.launch {
                         drawerState.close()
                         settingsVm.logout()
-                        nav.navigate("auth") {
-                            popUpTo(0) { inclusive = true }
-                        }
                     }
                 }
             )
