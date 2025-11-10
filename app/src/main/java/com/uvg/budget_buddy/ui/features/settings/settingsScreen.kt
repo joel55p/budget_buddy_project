@@ -15,14 +15,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
+    viewModel: SettingsViewModel,
     onBackClick: () -> Unit,
     onLogout: () -> Unit,
-    simulateErrors: kotlinx.coroutines.flow.StateFlow<Boolean>,
-    onToggleSimulateErrors: (Boolean) -> Unit,
     currentDarkMode: Boolean,
     onToggleDarkMode: (Boolean) -> Unit
 ) {
-    val sim by simulateErrors.collectAsStateWithLifecycle()
+    val sim by viewModel.simulateErrors.collectAsStateWithLifecycle()
+    val userEmail by viewModel.userEmail.collectAsStateWithLifecycle(initialValue = null)
     var notificationsEnabled by remember { mutableStateOf(true) }
     var showLogoutDialog by remember { mutableStateOf(false) }
 
@@ -44,6 +44,40 @@ fun SettingsScreen(
                 .padding(inner)
                 .padding(16.dp)
         ) {
+            // Usuario actual
+            userEmail?.let { email ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = null,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(Modifier.width(16.dp))
+                        Column {
+                            Text(
+                                "Usuario actual",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                email,
+                                style = MaterialTheme.typography.bodyLarge
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.height(24.dp))
+            }
 
             Text("Cuenta", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
@@ -53,21 +87,20 @@ fun SettingsScreen(
                         icon = Icons.Default.Person,
                         title = "Editar Perfil",
                         subtitle = "Actualiza tu información personal",
-                        onClick = { /* TODO: navegar a editar perfil */ }
+                        onClick = { /* TODO */ }
                     )
                     HorizontalDivider()
                     Item(
                         icon = Icons.Default.Lock,
                         title = "Cambiar Contraseña",
                         subtitle = "Actualiza tu contraseña de seguridad",
-                        onClick = { /* TODO: cambiar contraseña */ }
+                        onClick = { /* TODO */ }
                     )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // ===== Preferencias =====
             Text("Preferencias", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Card(Modifier.fillMaxWidth()) {
@@ -80,16 +113,12 @@ fun SettingsScreen(
                         onCheckedChange = { notificationsEnabled = it }
                     )
                     HorizontalDivider()
-
-                    // MODO OSCURO - Ahora con el estado correcto
                     SwitchItem(
                         icon = Icons.Default.DarkMode,
                         title = "Modo Oscuro",
                         subtitle = "Cambia el tema de la aplicación",
                         checked = currentDarkMode,
-                        onCheckedChange = { newValue ->
-                            onToggleDarkMode(newValue)
-                        }
+                        onCheckedChange = onToggleDarkMode
                     )
                     HorizontalDivider()
                     SwitchItem(
@@ -97,14 +126,13 @@ fun SettingsScreen(
                         title = "Simular errores",
                         subtitle = "Activa fallas de red simuladas",
                         checked = sim,
-                        onCheckedChange = onToggleSimulateErrors
+                        onCheckedChange = viewModel::toggleSimulateErrors
                     )
                 }
             }
 
             Spacer(Modifier.height(24.dp))
 
-            // ===== Sesión =====
             Text("Sesión", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             Button(
@@ -122,14 +150,17 @@ fun SettingsScreen(
         }
     }
 
-    // ===== Diálogo de logout =====
     if (showLogoutDialog) {
         AlertDialog(
             onDismissRequest = { showLogoutDialog = false },
             title = { Text("Cerrar Sesión") },
             text = { Text("¿Seguro que deseas cerrar sesión?") },
             confirmButton = {
-                TextButton(onClick = { showLogoutDialog = false; onLogout() }) {
+                TextButton(onClick = {
+                    showLogoutDialog = false
+                    viewModel.logout()
+                    onLogout()
+                }) {
                     Text("Confirmar")
                 }
             },

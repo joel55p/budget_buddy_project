@@ -15,11 +15,10 @@ import com.uvg.budget_buddy.ui.theme.Budget_buddyTheme
 import com.uvg.budget_buddy.ui.theme.ThemeViewModel
 
 class MainActivity : ComponentActivity() {
+    private val themeVm: ThemeViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        // ViewModel para modo oscuro/claro
-        val themeVm: ThemeViewModel by viewModels()
 
         setContent {
             val isDark by themeVm.isDarkMode.collectAsState()
@@ -29,12 +28,9 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    // Pasa el ViewModel al árbol principal
                     BudgetBuddyApp(themeVm)
                 }
             }
         }
     }
 }
-
-

@@ -4,7 +4,9 @@ import androidx.navigation.*
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.uvg.budget_buddy.ui.features.login.LoginScreen
+import com.uvg.budget_buddy.ui.features.login.LoginViewModel
 import com.uvg.budget_buddy.ui.features.register.RegisterScreen
+import com.uvg.budget_buddy.ui.features.register.RegisterViewModel
 import com.uvg.budget_buddy.ui.features.onBoarding.OnboardingScreen
 import com.uvg.budget_buddy.ui.features.home.DashboardScreen
 import com.uvg.budget_buddy.ui.features.home.DashboardViewModel
@@ -17,22 +19,38 @@ import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
 
 /** Graph de autenticación */
-fun NavGraphBuilder.authGraph(nav: NavHostController) {
+fun NavGraphBuilder.authGraph(
+    nav: NavHostController,
+    loginVm: LoginViewModel,
+    registerVm: RegisterViewModel
+) {
     navigation(startDestination = Screen.Login.route, route = "auth") {
 
         composable(Screen.Login.route) {
             LoginScreen(
-                onLoginClick = {
-                    nav.navigate(Screen.Onboarding.route)
+                viewModel = loginVm,
+                onLoginSuccess = {
+                    nav.navigate("app") {
+                        popUpTo("auth") { inclusive = true }
+                    }
                 },
-                onRegisterClick = { nav.navigate(Screen.Register.route) }
+                onRegisterClick = {
+                    nav.navigate(Screen.Register.route)
+                }
             )
         }
 
         composable(Screen.Register.route) {
             RegisterScreen(
-                onRegisterClick = { nav.popBackStack() },
-                onBackClick = { nav.popBackStack() }
+                viewModel = registerVm,
+                onRegisterSuccess = {
+                    nav.navigate("app") {
+                        popUpTo("auth") { inclusive = true }
+                    }
+                },
+                onBackClick = {
+                    nav.popBackStack()
+                }
             )
         }
 
@@ -96,14 +114,13 @@ fun NavGraphBuilder.appGraph(
 
         composable(Screen.Settings.route) {
             SettingsScreen(
+                viewModel = settingsVm,
                 onBackClick = { nav.popBackStack() },
                 onLogout = {
                     nav.navigate("auth") {
                         popUpTo("app") { inclusive = true }
                     }
                 },
-                simulateErrors = settingsVm.simulateErrors,
-                onToggleSimulateErrors = settingsVm::toggleSimulateErrors,
                 currentDarkMode = isDark,
                 onToggleDarkMode = onToggleDark
             )
