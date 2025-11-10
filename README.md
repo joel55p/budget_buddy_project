@@ -164,3 +164,82 @@ Temas y Estilos
 4.Azul suave (#4DABF7) para balance
 
 
+
+QUINTA ENTREGA
+
+se mantuvo la siguiente estructura 
+pp/src/main/java/com/uvg/budget_buddy/
+├── data/
+│   ├── local/                     # Room y DataStore
+│   │   ├── dao/Tdao.kt
+│   │   ├── entity/Tentity.kt
+│   │   ├── preferences/UserPreferencesDataStore.kt
+│   │   └── AppDatabase.kt
+│   ├── model/
+│   │   └── Transaction.kt
+│   └── repo/
+│       ├── AuthRepository.kt
+│       ├── BudgetRepository.kt      # Interfaz
+│       ├── FakeBudgetRepository.kt  # Implementación fake
+│       ├── FirebaseBudgetRepository.kt # Implementación real (NUEVO)
+│       └── Resource.kt
+├── navigation/
+│   ├── BudgetBuddyApp.kt
+│   ├── NavGraphs.kt
+│   └── Screens.kt
+├── ui/
+│   ├── components/
+│   ├── features/                  # Pantallas por feature (MVVM)
+│   │   ├── addExpense/
+│   │   ├── addInCome/
+│   │   ├── home/
+│   │   ├── login/
+│   │   ├── profile/
+│   │   ├── register/
+│   │   ├── settings/
+│   │   └── transactionDetail/
+│   └── theme/
+│       ├── Color.kt
+│       ├── Theme.kt
+│       ├── ThemeViewModel.kt
+│       └── Type.kt
+└── MainActivity.kt
+
+
+ademas se tienen los siguientes flujo 
+ 1.Flujo de Lectura (Cache-first, then Network):
+
+La UI (p.ej. DashboardScreen) observa el Flow del DashboardViewModel.
+
+El ViewModel consume el Flow<Resource<List<Transaction>>> del repositorio.
+
+El FirebaseBudgetRepository emite primero los datos locales de Room para una carga instantánea (.onStart).
+
+Simultáneamente, establece un ValueEventListener de Firebase.
+
+Cuando Firebase devuelve datos (onDataChange), el repositorio los guarda en Room (transactionDao.insertTransaction).
+
+Como Room devuelve un Flow, la base de datos local emite automáticamente los nuevos datos, actualizando la UI de forma reactiva.
+
+Si Firebase falla, el Flow entra en el .catch y emite los datos de Room como fallback.
+
+2. Flujo de Escritura (Offline-first):
+
+El usuario agrega un ingreso o gasto (p.ej. AddIncomeViewModel).
+
+El ViewModel llama a repo.addIncome().
+
+El FirebaseBudgetRepository guarda la transacción en Room primero, marcándola como no sincronizada (syncedWithFirebase = false).
+
+La UI se actualiza inmediatamente (gracias al Flow de Room).
+
+El repositorio intenta sincronizar el dato con Firebase.
+
+Si tiene éxito, actualiza el registro en Room a syncedWithFirebase = true.
+
+Si falla (sin conexión), la transacción permanece en Room como pendiente para una sincronización futura (syncPendingTransactions).
+
+Manejo de Estados (Carga y Error): Se utiliza la clase Resource<T> (Loading, Success, Error) para comunicar el estado de la carga de datos del repositorio al ViewModel y, finalmente, a la UI, mostrando CircularProgressIndicator o mensajes de error.
+
+
+
