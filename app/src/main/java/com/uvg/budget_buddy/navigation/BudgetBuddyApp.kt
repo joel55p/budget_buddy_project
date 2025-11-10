@@ -62,9 +62,10 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         }
     )
 
+    // CAMBIO IMPORTANTE: Pasar authRepository al DashboardViewModel
     val dashboardVm: DashboardViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { DashboardViewModel(budgetRepo) }
+            initializer { DashboardViewModel(budgetRepo, authRepository) }
         }
     )
 
@@ -107,7 +108,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     LaunchedEffect(isLoggedIn, route) {
         if (isLoggedIn && !hasNavigatedAfterRegister) {
             if (route == Screen.Register.route || route == Screen.Login.route) {
-                // Pequeño delay adicional para asegurar que todo esté listo
                 delay(600)
                 hasNavigatedAfterRegister = true
                 nav.navigate("app") {

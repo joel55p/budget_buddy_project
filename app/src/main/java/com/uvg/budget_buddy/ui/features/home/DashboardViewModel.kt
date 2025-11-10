@@ -3,6 +3,7 @@ package com.uvg.budget_buddy.ui.features.home
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uvg.budget_buddy.data.model.Transaction
+import com.uvg.budget_buddy.data.repo.AuthRepository
 import com.uvg.budget_buddy.data.repo.BudgetRepository
 import com.uvg.budget_buddy.data.repo.Resource
 import kotlinx.coroutines.flow.*
@@ -22,28 +23,40 @@ sealed interface DashboardEvent {
     data object Retry : DashboardEvent
 }
 
-class DashboardViewModel(private val repo: BudgetRepository) : ViewModel() {
+class DashboardViewModel(
+    private val repo: BudgetRepository,
+    private val authRepository: AuthRepository  // <- NUEVO parámetro
+) : ViewModel() {
+
     private val _state = MutableStateFlow(DashboardUiState(isLoading = true))
     val state: StateFlow<DashboardUiState> = _state
 
     init {
-        // Pequeño delay para dar tiempo a que Firebase se inicialice
+        observeAuthAndData()
+    }
+
+    // NUEVA función: Observa cambios en el estado de autenticación
+    private fun observeAuthAndData() {
         viewModelScope.launch {
-            delay(500)
-            observe()
+            authRepository.observeAuthState()
+                .filterNotNull() // Solo cuando hay usuario autenticado
+                .collectLatest { user ->
+                    // Usuario autenticado, ahora observar transacciones
+                    delay(300) // Pequeño delay para que Firebase se estabilice
+                    observeTransactions()
+                }
         }
     }
 
-    private fun observe() {
+    private fun observeTransactions() {
         viewModelScope.launch {
             repo.observeTransactions()
                 .catch { e ->
-                    // Capturar errores silenciosamente en la primera carga
                     _state.update {
                         DashboardUiState(
                             isLoading = false,
                             transactions = emptyList(),
-                            error = null  // No mostrar error en primera carga
+                            error = null
                         )
                     }
                 }
@@ -66,7 +79,6 @@ class DashboardViewModel(private val repo: BudgetRepository) : ViewModel() {
                             )
                         }
                         is Resource.Error -> {
-                            // Solo mostrar error si ya había datos cargados anteriormente
                             val currentTxs = _state.value.transactions
                             if (currentTxs.isNotEmpty()) {
                                 _state.update {
@@ -76,7 +88,6 @@ class DashboardViewModel(private val repo: BudgetRepository) : ViewModel() {
                                     )
                                 }
                             } else {
-                                // Primera carga: no mostrar error, solo estado vacío
                                 _state.update {
                                     it.copy(
                                         isLoading = false,
@@ -93,7 +104,7 @@ class DashboardViewModel(private val repo: BudgetRepository) : ViewModel() {
     fun onEvent(e: DashboardEvent) {
         if (e is DashboardEvent.Retry) {
             _state.update { it.copy(isLoading = true, error = null) }
-            observe()
+            observeTransactions()
         }
     }
 }
