@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.uvg.budget_buddy.data.repo.AuthRepository
 import com.uvg.budget_buddy.data.repo.AuthResult
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -90,8 +91,14 @@ class RegisterViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
+            // Pequeño delay para asegurar que la UI se actualiza
+            delay(100)
+
             when (val result = authRepository.signUp(email, password)) {
                 is AuthResult.Success -> {
+                    // Esperar un momento adicional para que Firebase complete la autenticación
+                    delay(300)
+
                     _state.update {
                         it.copy(
                             isLoading = false,

@@ -17,6 +17,7 @@ import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseViewModel
 import com.uvg.budget_buddy.ui.features.profile.ProfileScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
+import com.uvg.budget_buddy.ui.features.transactionDetail.TransactionDetailScreen
 
 /** Graph de autenticación */
 fun NavGraphBuilder.authGraph(
@@ -73,6 +74,7 @@ fun NavGraphBuilder.appGraph(
     addIncomeVm: AddIncomeViewModel,
     addExpenseVm: AddExpenseViewModel,
     settingsVm: SettingsViewModel,
+    profileVm: com.uvg.budget_buddy.ui.features.profile.ProfileViewModel,  // ← AGREGADO
     isDark: Boolean,
     onToggleDark: (Boolean) -> Unit
 ) {
@@ -83,7 +85,9 @@ fun NavGraphBuilder.appGraph(
                 stateFlow = dashboardVm.state,
                 onAddIncomeClick = { nav.navigate(Screen.AddIncome.route) },
                 onAddExpenseClick = { nav.navigate(Screen.AddExpense.route) },
-                onOpenTxDetail = { id -> nav.navigate("tx_detail/$id") }
+                onOpenTxDetail = { id ->
+                    nav.navigate("transaction_detail/$id")
+                }
             )
         }
 
@@ -107,6 +111,7 @@ fun NavGraphBuilder.appGraph(
 
         composable(Screen.Profile.route) {
             ProfileScreen(
+                viewModel = profileVm,  // ← AGREGADO
                 onBackClick = { nav.popBackStack() },
                 onEditProfile = { }
             )
@@ -123,6 +128,24 @@ fun NavGraphBuilder.appGraph(
                 },
                 currentDarkMode = isDark,
                 onToggleDarkMode = onToggleDark
+            )
+        }
+
+        // NUEVA RUTA: Detalle de transacción con argumento
+        composable(
+            route = "transaction_detail/{transactionId}",
+            arguments = listOf(
+                navArgument("transactionId") {
+                    type = NavType.LongType
+                }
+            )
+        ) { backStackEntry ->
+            val transactionId = backStackEntry.arguments?.getLong("transactionId") ?: 0L
+
+            TransactionDetailScreen(
+                transactionId = transactionId,
+                dashboardVm = dashboardVm,
+                onBackClick = { nav.popBackStack() }
             )
         }
     }
