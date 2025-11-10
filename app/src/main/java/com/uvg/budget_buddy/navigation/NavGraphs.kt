@@ -111,7 +111,7 @@ fun NavGraphBuilder.appGraph(
 
         composable(Screen.Profile.route) {
             ProfileScreen(
-                viewModel = profileVm,  // ← AGREGADO
+                viewModel = profileVm,  //
                 onBackClick = { nav.popBackStack() },
                 onEditProfile = { }
             )
@@ -131,7 +131,7 @@ fun NavGraphBuilder.appGraph(
             )
         }
 
-        // NUEVA RUTA: Detalle de transacción con argumento
+        // NUEVA ruta: Detalle de transacción con argumento
         composable(
             route = "transaction_detail/{transactionId}",
             arguments = listOf(

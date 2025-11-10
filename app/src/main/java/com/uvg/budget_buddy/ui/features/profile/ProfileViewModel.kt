@@ -12,7 +12,7 @@ data class ProfileUiState(
     val name: String = "",
     val email: String = "",
     val isLoading: Boolean = true,
-    val error: String? = null  // ← AGREGADO
+    val error: String? = null
 )
 
 class ProfileViewModel(
@@ -28,9 +28,9 @@ class ProfileViewModel(
 
     private fun loadUserData() {
         viewModelScope.launch {
-            _state.update { it.copy(isLoading = true, error = null) }  // ← MODIFICADO
+            _state.update { it.copy(isLoading = true, error = null) }
 
-            try {  // ← AGREGADO try-catch
+            try {  // try-catch
                 val user = authRepository.currentUser
                 if (user != null) {
                     // Extraer el nombre del email
@@ -61,7 +61,7 @@ class ProfileViewModel(
                         )
                     }
                 }
-            } catch (e: Exception) {  // ← AGREGADO manejo de errores
+            } catch (e: Exception) {  // manejo de errores
                 _state.update {
                     it.copy(
                         isLoading = false,

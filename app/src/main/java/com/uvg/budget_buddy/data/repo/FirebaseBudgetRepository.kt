@@ -20,6 +20,9 @@ class FirebaseBudgetRepository(
     private val _simulateErrors = MutableStateFlow(false)
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
+    // NUEVO: StateFlow para forzar recargas
+    private val _refreshTrigger = MutableStateFlow(0L)
+
     private fun getTransactionsRef(userId: String): DatabaseReference {
         return database.reference.child("transactions").child(userId)
     }
@@ -35,10 +38,41 @@ class FirebaseBudgetRepository(
         val userId = authRepository.currentUser?.uid
             ?: return flowOf(Resource.Error("Usuario no autenticado"))
 
+        // SOLUCIÓN: Combinar Room local + Firebase + trigger manual
+        return combine(
+            transactionDao.observeTransactionsByUser(userId),
+            _refreshTrigger,
+            observeFirebaseTransactions(userId)
+        ) { localTransactions, _, firebaseResource ->
+            when (firebaseResource) {
+                is Resource.Loading -> {
+                    // Si hay datos locales, mostrarlos mientras carga
+                    if (localTransactions.isNotEmpty()) {
+                        Resource.Success(localTransactions.map { it.toTransaction() })
+                    } else {
+                        Resource.Loading
+                    }
+                }
+                is Resource.Success -> {
+                    // Siempre priorizar Firebase cuando esté disponible
+                    firebaseResource
+                }
+                is Resource.Error -> {
+                    // Fallback a datos locales si Firebase falla
+                    if (localTransactions.isNotEmpty()) {
+                        Resource.Success(localTransactions.map { it.toTransaction() })
+                    } else {
+                        firebaseResource
+                    }
+                }
+            }
+        }
+    }
+
+    private fun observeFirebaseTransactions(userId: String): Flow<Resource<List<Transaction>>> {
         return callbackFlow {
             trySend(Resource.Loading)
 
-            // Listener de Firebase
             val listener = object : ValueEventListener {
                 override fun onDataChange(snapshot: DataSnapshot) {
                     repositoryScope.launch {
@@ -71,24 +105,6 @@ class FirebaseBudgetRepository(
             awaitClose {
                 getTransactionsRef(userId).removeEventListener(listener)
             }
-        }.onStart {
-            // Cargar datos locales primero para mostrar algo mientras se conecta a Firebase
-            try {
-                val entities = transactionDao.getTransactionsByUser(userId)
-                if (entities.isNotEmpty()) {
-                    emit(Resource.Success(entities.map { it.toTransaction() }))
-                }
-            } catch (e: Exception) {
-                // Si falla, continuará con Firebase
-            }
-        }.catch { e ->
-            // Si falla Firebase, intentar cargar datos locales como fallback
-            val entities = transactionDao.getTransactionsByUser(userId)
-            if (entities.isNotEmpty()) {
-                emit(Resource.Success(entities.map { it.toTransaction() }))
-            } else {
-                emit(Resource.Error("Error de conexión y sin datos locales: ${e.message}"))
-            }
         }
     }
 
@@ -96,32 +112,37 @@ class FirebaseBudgetRepository(
         val userId = authRepository.currentUser?.uid
             ?: return Result.failure(Exception("Usuario no autenticado"))
 
-        return try {
-            val id = getTransactionsRef(userId).push().key
-                ?: return Result.failure(Exception("Error al generar ID"))
-
-            val transaction = TransactionFirebase(
-                description = if (description.isBlank()) "Ingreso" else description,
-                amount = amount,
-                dateText = today()
-            )
-
-            // Guardar localmente primero
-            val entity = transaction.toTransactionEntity(id, userId)
-            transactionDao.insertTransaction(entity)
-
-            // Sincronizar con Firebase
+        return withContext(Dispatchers.IO) {
             try {
-                getTransactionsRef(userId).child(id).setValue(transaction).await()
-                // Marcar como sincronizado
-                transactionDao.updateTransaction(entity.copy(syncedWithFirebase = true))
-            } catch (e: Exception) {
-                // Quedará marcado como no sincronizado para reintento posterior
-            }
+                val id = getTransactionsRef(userId).push().key
+                    ?: return@withContext Result.failure(Exception("Error al generar ID"))
 
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+                val transaction = TransactionFirebase(
+                    description = if (description.isBlank()) "Ingreso" else description,
+                    amount = amount,
+                    dateText = today()
+                )
+
+                // 1. Guardar en Room primero
+                val entity = transaction.toTransactionEntity(id, userId)
+                transactionDao.insertTransaction(entity)
+
+                // 2. NUEVO: Forzar refresh inmediato
+                _refreshTrigger.value = System.currentTimeMillis()
+
+                // 3. Sincronizar con Firebase en background
+                try {
+                    getTransactionsRef(userId).child(id).setValue(transaction).await()
+                    transactionDao.updateTransaction(entity.copy(syncedWithFirebase = true))
+                } catch (e: Exception) {
+                    // Quedará marcado como no sincronizado
+                    // pero ya se ve en la UI por Room
+                }
+
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 
@@ -129,32 +150,36 @@ class FirebaseBudgetRepository(
         val userId = authRepository.currentUser?.uid
             ?: return Result.failure(Exception("Usuario no autenticado"))
 
-        return try {
-            val id = getTransactionsRef(userId).push().key
-                ?: return Result.failure(Exception("Error al generar ID"))
-
-            val transaction = TransactionFirebase(
-                description = if (description.isBlank()) "Gasto" else description,
-                amount = -amount,
-                dateText = today()
-            )
-
-            // Guardar localmente primero
-            val entity = transaction.toTransactionEntity(id, userId)
-            transactionDao.insertTransaction(entity)
-
-            // Sincronizar con Firebase
+        return withContext(Dispatchers.IO) {
             try {
-                getTransactionsRef(userId).child(id).setValue(transaction).await()
-                // Marcar como sincronizado
-                transactionDao.updateTransaction(entity.copy(syncedWithFirebase = true))
-            } catch (e: Exception) {
-                // Quedará marcado como no sincronizado para reintento posterior
-            }
+                val id = getTransactionsRef(userId).push().key
+                    ?: return@withContext Result.failure(Exception("Error al generar ID"))
 
-            Result.success(Unit)
-        } catch (e: Exception) {
-            Result.failure(e)
+                val transaction = TransactionFirebase(
+                    description = if (description.isBlank()) "Gasto" else description,
+                    amount = -amount,
+                    dateText = today()
+                )
+
+                // 1. Guardar en Room primero
+                val entity = transaction.toTransactionEntity(id, userId)
+                transactionDao.insertTransaction(entity)
+
+                // 2. NUEVO: Forzar refresh inmediato
+                _refreshTrigger.value = System.currentTimeMillis()
+
+                // 3. Sincronizar con Firebase en background
+                try {
+                    getTransactionsRef(userId).child(id).setValue(transaction).await()
+                    transactionDao.updateTransaction(entity.copy(syncedWithFirebase = true))
+                } catch (e: Exception) {
+                    // Quedará marcado como no sincronizado
+                }
+
+                Result.success(Unit)
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
         }
     }
 
