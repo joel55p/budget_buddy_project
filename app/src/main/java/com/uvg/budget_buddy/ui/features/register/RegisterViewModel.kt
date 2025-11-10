@@ -91,13 +91,10 @@ class RegisterViewModel(
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, error = null) }
 
-            // Pequeño delay para asegurar que la UI se actualiza
-            delay(100)
-
             when (val result = authRepository.signUp(email, password)) {
                 is AuthResult.Success -> {
-                    // Esperar un momento adicional para que Firebase complete la autenticación
-                    delay(300)
+                    // Esperar más tiempo para que Firebase complete todo el proceso
+                    delay(800)
 
                     _state.update {
                         it.copy(

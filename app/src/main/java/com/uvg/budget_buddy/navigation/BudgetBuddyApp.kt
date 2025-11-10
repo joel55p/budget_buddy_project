@@ -86,7 +86,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         }
     )
 
-    // ← AGREGADO ProfileViewModel
     val profileVm: com.uvg.budget_buddy.ui.features.profile.ProfileViewModel = viewModel(
         factory = viewModelFactory {
             initializer { com.uvg.budget_buddy.ui.features.profile.ProfileViewModel(authRepository) }
@@ -97,40 +96,29 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     val scope = rememberCoroutineScope()
     val isDark by themeVm.isDarkMode.collectAsState()
 
-    // Observar estado de autenticación desde Firebase directamente
+    // Observar estado de autenticación
     val authState by authRepository.observeAuthState().collectAsState(initial = null)
     val isLoggedIn = authState != null
 
-    // Estado para controlar la inicialización
-    var isInitialized by remember { mutableStateOf(false) }
+    // Estado para controlar la navegación después del registro
+    var hasNavigatedAfterRegister by remember { mutableStateOf(false) }
 
-    // Inicializar después de un pequeño delay
-    LaunchedEffect(Unit) {
-        delay(100)
-        isInitialized = true
-    }
-
-    // Navegar automáticamente según el estado de autenticación
-    LaunchedEffect(isLoggedIn, route, isInitialized) {
-        if (!isInitialized) return@LaunchedEffect
-
-        if (isLoggedIn) {
-            // Usuario autenticado
-            if (route == Screen.Login.route ||
-                route == Screen.Register.route ||
-                route == "auth" ||
-                route == null) {
-                delay(200) // Pequeño delay para asegurar que Firebase está listo
+    // Manejar navegación después del registro exitoso
+    LaunchedEffect(isLoggedIn, route) {
+        if (isLoggedIn && !hasNavigatedAfterRegister) {
+            if (route == Screen.Register.route || route == Screen.Login.route) {
+                // Pequeño delay adicional para asegurar que todo esté listo
+                delay(600)
+                hasNavigatedAfterRegister = true
                 nav.navigate("app") {
                     popUpTo(0) { inclusive = true }
                 }
             }
-        } else {
-            // Usuario no autenticado
+        } else if (!isLoggedIn) {
+            hasNavigatedAfterRegister = false
             if (route != Screen.Login.route &&
                 route != Screen.Register.route &&
-                route != "auth" &&
-                route != null) {
+                route != "auth") {
                 nav.navigate("auth") {
                     popUpTo(0) { inclusive = true }
                 }
@@ -154,6 +142,7 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     scope.launch {
                         drawerState.close()
                         settingsVm.logout()
+                        hasNavigatedAfterRegister = false
                     }
                 }
             )
@@ -213,7 +202,7 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     addIncomeVm = addIncomeVm,
                     addExpenseVm = addExpenseVm,
                     settingsVm = settingsVm,
-                    profileVm = profileVm,  // ← AGREGADO
+                    profileVm = profileVm,
                     isDark = isDark,
                     onToggleDark = themeVm::setTheme
                 )

@@ -4,7 +4,7 @@
     <selectionStates>
       <SelectionState runConfigName="budget_buddy.app">
         <option name="selectionMode" value="DROPDOWN" />
-        <DropdownSelection timestamp="2025-11-10T04:31:23.922298800Z">
+        <DropdownSelection timestamp="2025-11-10T05:30:53.344651Z">
           <Target type="DEFAULT_BOOT">
             <handle>
               <DeviceId pluginId="PhysicalDevice" identifier="serial=R5CRC1G8NGL" />
