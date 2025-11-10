@@ -1,26 +1,32 @@
 package com.uvg.budget_buddy.ui.theme
 
-import android.util.Log
-import androidx.lifecycle.ViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.viewModelScope
+import com.uvg.budget_buddy.data.local.preferences.UserPreferencesDataStore
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
-class ThemeViewModel : ViewModel() {
-    private val TAG = "ThemeViewModel"
+class ThemeViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val _isDarkMode = MutableStateFlow(false)
-    val isDarkMode: StateFlow<Boolean> = _isDarkMode.asStateFlow()
+    private val userPreferences = UserPreferencesDataStore(application)
 
-    fun toggleTheme() {
-        val newValue = !_isDarkMode.value
-        Log.d(TAG, "toggleTheme() called. Old value: ${_isDarkMode.value}, New value: $newValue")
-        _isDarkMode.value = newValue
-    }
+    val isDarkMode = userPreferences.isDarkMode.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
 
     fun setTheme(dark: Boolean) {
-        Log.d(TAG, "setTheme() called with dark=$dark. Current value: ${_isDarkMode.value}")
-        _isDarkMode.value = dark
-        Log.d(TAG, "setTheme() completed. New value: ${_isDarkMode.value}")
+        viewModelScope.launch {
+            userPreferences.setDarkMode(dark)
+        }
+    }
+
+    fun toggleTheme() {
+        viewModelScope.launch {
+            userPreferences.setDarkMode(!isDarkMode.value)
+        }
     }
 }
