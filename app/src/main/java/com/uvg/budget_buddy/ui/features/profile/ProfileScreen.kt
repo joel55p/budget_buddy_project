@@ -4,13 +4,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,31 +29,19 @@ fun ProfileScreen(
 
     if (state.isLoading) {
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier
+                .fillMaxSize(),
             contentAlignment = Alignment.Center
         ) {
             CircularProgressIndicator()
         }
     } else {
-        // Nombre a mostrar:
-        // - si hay nombre, usamos la primera "palabra"
-        // - si no hay nombre, usamos el email
-        // - si tampoco hay email, usamos "Usuario"
-        val displayName = when {
-            state.name.isNotBlank() ->
-                state.name.trim().substringBefore(" ")
-            state.email.isNotBlank() ->
-                state.email.substringBefore("@")
-            else -> "Usuario"
-        }
-
         Column(
-            modifier = Modifier
+            Modifier
                 .fillMaxSize()
                 .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Avatar
             Box(
                 modifier = Modifier
                     .size(120.dp)
@@ -63,36 +49,25 @@ fun ProfileScreen(
                     .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
+                androidx.compose.material3.Icon(
                     Icons.Default.Person,
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp)
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             }
 
             Spacer(Modifier.height(16.dp))
 
-            // Nombre grande
+            // Email debajo de la imagen
             Text(
-                text = displayName,
-                fontSize = 22.sp,
-                color = MaterialTheme.colorScheme.onBackground
+                text = state.email,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
             )
-
-            Spacer(Modifier.height(4.dp))
-
-            // Subtítulo pequeño (opcional)
-            if (state.name.isNotBlank() && state.name != displayName) {
-                Text(
-                    text = state.name,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
 
             Spacer(Modifier.height(24.dp))
 
-            // Tarjeta de información de cuenta
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -101,32 +76,26 @@ fun ProfileScreen(
             ) {
                 Column(Modifier.padding(16.dp)) {
                     ListItem(
-                        leadingContent = {
-                            Icon(Icons.Default.Email, contentDescription = null)
-                        },
-                        headlineContent = { Text("Email") },
-                        supportingContent = {
-                            Text(
-                                text = state.email.ifBlank { "No disponible" }
-                            )
-                        }
+                        headlineContent = { Text("Correo electrónico") },
+                        supportingContent = { Text(state.email) }
                     )
 
                     HorizontalDivider()
 
                     ListItem(
-                        leadingContent = {
-                            Icon(Icons.Default.Person, contentDescription = null)
-                        },
+                        headlineContent = { Text("Estado de la cuenta") },
+                        supportingContent = { Text("Activa") }
+                    )
+
+                    HorizontalDivider()
+
+                    ListItem(
                         headlineContent = { Text("Tipo de cuenta") },
-                        supportingContent = {
-                            Text("Cuenta personal")
-                        }
+                        supportingContent = { Text("Personal") }
                     )
                 }
             }
 
-            // Errores
             state.error?.let { error ->
                 Spacer(Modifier.height(16.dp))
                 Text(
@@ -135,11 +104,6 @@ fun ProfileScreen(
                     style = MaterialTheme.typography.bodySmall
                 )
             }
-
-            Spacer(Modifier.weight(1f))
-
-            // Ya no hay botón de "Editar perfil"
-            // La gestión de contraseña se hace en Settings → Cambiar contraseña.
         }
     }
 }
