@@ -7,6 +7,10 @@ val GreenPrimary       = Color(0xFF6BCB77) // verde suave (header, icono login)
 val GreenPrimaryDark   = Color(0xFF3FA857) // verde más oscuro (botones)
 val GreenPrimaryLight  = Color(0xFFA8E6B0) // muy suave (fondos/acentos ligeros)
 
+val GreenDarkPrimary     = Color(0xFF2F6B3A)
+
+val GreenDarkPrimaryCont = Color(0xFF234B2A)
+
 // Grises claros + blanco
 val GrayLight1         = Color(0xFFF2F4F7)
 val GrayLight2         = Color(0xFFE5E7EB)

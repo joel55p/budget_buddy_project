@@ -4,11 +4,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
-import androidx.compose.material3.*
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -18,87 +21,88 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProfileScreen(
-    viewModel: ProfileViewModel,
-    onBackClick: () -> Unit,
-    onEditProfile: () -> Unit
+    viewModel: ProfileViewModel
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("Mi Perfil") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
-                    }
-                }
-            )
+    if (state.isLoading) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
         }
-    ) { inner ->
-        if (state.isLoading) {
+    } else {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Box(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(inner),
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
                 contentAlignment = Alignment.Center
             ) {
-                CircularProgressIndicator()
+                androidx.compose.material3.Icon(
+                    Icons.Default.Person,
+                    contentDescription = null,
+                    modifier = Modifier.size(64.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             }
-        } else {
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(inner)
-                    .padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+
+            Spacer(Modifier.height(16.dp))
+
+            // Email debajo de la imagen
+            Text(
+                text = state.email,
+                fontSize = 18.sp,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Spacer(Modifier.height(24.dp))
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surface
+                )
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primaryContainer),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(Icons.Default.Person, contentDescription = null, modifier = Modifier.size(64.dp))
-                }
-                Spacer(Modifier.height(16.dp))
-                Text(state.name, fontSize = 22.sp)
+                Column(Modifier.padding(16.dp)) {
+                    ListItem(
+                        headlineContent = { Text("Correo electrónico") },
+                        supportingContent = { Text(state.email) }
+                    )
 
-                Spacer(Modifier.height(24.dp))
-                Card(Modifier.fillMaxWidth()) {
-                    Column(Modifier.padding(16.dp)) {
-                        ListItem(
-                            leadingContent = { Icon(Icons.Default.Email, contentDescription = null) },
-                            headlineContent = { Text("Email") },
-                            supportingContent = { Text(state.email) }
-                        )
-                        HorizontalDivider()
-                        ListItem(
-                            leadingContent = { Icon(Icons.Default.Lock, contentDescription = null) },
-                            headlineContent = { Text("Contraseña") },
-                            supportingContent = { Text("••••••••") }
-                        )
-                    }
-                }
+                    HorizontalDivider()
 
-                //  manejo de errores
-                state.error?.let { error ->
-                    Spacer(Modifier.height(16.dp))
-                    Text(
-                        error,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
+                    ListItem(
+                        headlineContent = { Text("Estado de la cuenta") },
+                        supportingContent = { Text("Activa") }
+                    )
+
+                    HorizontalDivider()
+
+                    ListItem(
+                        headlineContent = { Text("Tipo de cuenta") },
+                        supportingContent = { Text("Personal") }
                     )
                 }
+            }
 
-                Spacer(Modifier.weight(1f))
-                Button(onClick = onEditProfile, modifier = Modifier.fillMaxWidth()) {
-                    Text("Editar Perfil")
-                }
+            state.error?.let { error ->
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }

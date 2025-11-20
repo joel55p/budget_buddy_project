@@ -12,15 +12,20 @@ fun HeaderBar(
     onMenuClick: () -> Unit
 ) {
     TopAppBar(
-        title = { Text(title) },
+        title = {
+            Text(text = title)
+        },
         navigationIcon = {
             IconButton(onClick = onMenuClick) {
-                Icon(Icons.Default.Menu, contentDescription = "Menú")
+                Icon(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menú"
+                )
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = MaterialTheme.colorScheme.onPrimary,
+            containerColor = MaterialTheme.colorScheme.primary,          // <<-- GreenPrimary
+            titleContentColor = MaterialTheme.colorScheme.onPrimary,     // blanco
             navigationIconContentColor = MaterialTheme.colorScheme.onPrimary
         )
     )

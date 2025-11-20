@@ -306,14 +306,5 @@ private fun DashboardContent(
         }
 
         Spacer(Modifier.height(16.dp))
-
-        Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-            Button(onClick = onAddIncomeClick, modifier = Modifier.weight(1f)) {
-                Text("Añadir ingreso")
-            }
-            OutlinedButton(onClick = onAddExpenseClick, modifier = Modifier.weight(1f)) {
-                Text("Agregar gasto")
-            }
-        }
     }
 }

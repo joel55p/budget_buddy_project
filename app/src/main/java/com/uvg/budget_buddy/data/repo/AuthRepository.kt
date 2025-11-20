@@ -62,5 +62,49 @@ class AuthRepository(
         userPreferences.clearUserData()
     }
 
+    suspend fun reauthenticateUser(password: String): AuthResult {
+        val user = auth.currentUser ?: return AuthResult.Error("Usuario no autenticado")
+
+        val credential = com.google.firebase.auth.EmailAuthProvider
+            .getCredential(user.email ?: return AuthResult.Error("Email no disponible"), password)
+
+        return try {
+            user.reauthenticate(credential).await()
+            AuthResult.Success(user)
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Error al reautenticar usuario")
+        }
+    }
+
+    suspend fun updatePassword(newPassword: String): AuthResult {
+        val user = auth.currentUser ?: return AuthResult.Error("Usuario no autenticado")
+
+        return try {
+            user.updatePassword(newPassword).await()
+            AuthResult.Success(user)
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Error al actualizar contraseña")
+        }
+    }
+
+    suspend fun changePassword(oldPassword: String, newPassword: String): AuthResult {
+        return try {
+            val user = auth.currentUser ?: return AuthResult.Error("Usuario no logueado")
+
+            val email = user.email ?: return AuthResult.Error("Email no disponible")
+
+            // Re-autenticar al usuario
+            val credential = com.google.firebase.auth.EmailAuthProvider.getCredential(email, oldPassword)
+            user.reauthenticate(credential).await()
+
+            // Cambiar la contraseña
+            user.updatePassword(newPassword).await()
+
+            AuthResult.Success(user)
+        } catch (e: Exception) {
+            AuthResult.Error(e.message ?: "Error al cambiar contraseña")
+        }
+    }
+
     fun isUserLoggedIn(): Boolean = currentUser != null
 }
