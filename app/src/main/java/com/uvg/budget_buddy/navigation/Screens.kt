@@ -13,6 +13,9 @@ sealed class Screen(val route: String) {
     data object Profile : Screen("profile")
     data object Settings : Screen("settings")
 
+    data object ChangePassword : Screen("change_password")
+
+
     //  se implementa esta nueva ruta:  es la de Detalle con argumento
     data object TransactionDetail : Screen("transaction_detail")
 }

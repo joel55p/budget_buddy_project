@@ -3,23 +3,26 @@ package com.uvg.budget_buddy.navigation
 import androidx.navigation.*
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
-import com.uvg.budget_buddy.ui.features.login.LoginScreen
-import com.uvg.budget_buddy.ui.features.login.LoginViewModel
-import com.uvg.budget_buddy.ui.features.register.RegisterScreen
-import com.uvg.budget_buddy.ui.features.register.RegisterViewModel
-import com.uvg.budget_buddy.ui.features.onBoarding.OnboardingScreen
-import com.uvg.budget_buddy.ui.features.home.DashboardScreen
-import com.uvg.budget_buddy.ui.features.home.DashboardViewModel
-import com.uvg.budget_buddy.ui.features.addInCome.AddIncomeScreen
-import com.uvg.budget_buddy.ui.features.addInCome.AddIncomeViewModel
+import com.uvg.budget_buddy.data.repo.AuthRepository
+import com.uvg.budget_buddy.ui.features.ChangePassword.ChangePasswordScreen
 import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseScreen
 import com.uvg.budget_buddy.ui.features.addExpense.AddExpenseViewModel
+import com.uvg.budget_buddy.ui.features.addInCome.AddIncomeScreen
+import com.uvg.budget_buddy.ui.features.addInCome.AddIncomeViewModel
+import com.uvg.budget_buddy.ui.features.home.DashboardScreen
+import com.uvg.budget_buddy.ui.features.home.DashboardViewModel
+import com.uvg.budget_buddy.ui.features.login.LoginScreen
+import com.uvg.budget_buddy.ui.features.login.LoginViewModel
+import com.uvg.budget_buddy.ui.features.onBoarding.OnboardingScreen
 import com.uvg.budget_buddy.ui.features.profile.ProfileScreen
+import com.uvg.budget_buddy.ui.features.profile.ProfileViewModel
+import com.uvg.budget_buddy.ui.features.register.RegisterScreen
+import com.uvg.budget_buddy.ui.features.register.RegisterViewModel
 import com.uvg.budget_buddy.ui.features.settings.SettingsScreen
 import com.uvg.budget_buddy.ui.features.settings.SettingsViewModel
 import com.uvg.budget_buddy.ui.features.transactionDetail.TransactionDetailScreen
+import com.uvg.budget_buddy.ui.theme.ThemeViewModel
 
-/** Graph de autenticación */
 fun NavGraphBuilder.authGraph(
     nav: NavHostController,
     loginVm: LoginViewModel,
@@ -67,16 +70,15 @@ fun NavGraphBuilder.authGraph(
     }
 }
 
-/** Graph principal de la app */
 fun NavGraphBuilder.appGraph(
     nav: NavHostController,
     dashboardVm: DashboardViewModel,
     addIncomeVm: AddIncomeViewModel,
     addExpenseVm: AddExpenseViewModel,
     settingsVm: SettingsViewModel,
-    profileVm: com.uvg.budget_buddy.ui.features.profile.ProfileViewModel,  // ← AGREGADO
-    isDark: Boolean,
-    onToggleDark: (Boolean) -> Unit
+    profileVm: ProfileViewModel,
+    themeVm: ThemeViewModel,
+    authRepository: AuthRepository
 ) {
     navigation(startDestination = Screen.Dashboard.route, route = "app") {
 
@@ -109,29 +111,36 @@ fun NavGraphBuilder.appGraph(
             )
         }
 
-        composable(Screen.Profile.route) {
+        composable(route = Screen.Profile.route) {
             ProfileScreen(
-                viewModel = profileVm,  //
-                onBackClick = { nav.popBackStack() },
-                onEditProfile = { }
+                viewModel = profileVm,
+
             )
         }
 
-        composable(Screen.Settings.route) {
+        composable(route = Screen.Settings.route) {
             SettingsScreen(
                 viewModel = settingsVm,
-                onBackClick = { nav.popBackStack() },
+                themeVm = themeVm,
                 onLogout = {
                     nav.navigate("auth") {
                         popUpTo("app") { inclusive = true }
                     }
                 },
-                currentDarkMode = isDark,
-                onToggleDarkMode = onToggleDark
+                onChangePasswordClick = {
+                    nav.navigate(Screen.ChangePassword.route)
+                }
             )
         }
 
-        // NUEVA ruta: Detalle de transacción con argumento
+        composable(route = Screen.ChangePassword.route) {
+            ChangePasswordScreen(
+                authRepository = authRepository,
+                onBackClick = { nav.popBackStack() },
+                onSuccess = { nav.popBackStack() }
+            )
+        }
+
         composable(
             route = "transaction_detail/{transactionId}",
             arguments = listOf(

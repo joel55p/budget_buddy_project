@@ -28,6 +28,8 @@ import com.uvg.budget_buddy.ui.features.login.LoginViewModel
 import com.uvg.budget_buddy.ui.features.register.RegisterViewModel
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.collectAsState
+import com.uvg.budget_buddy.ui.components.HeaderBar
+import com.uvg.budget_buddy.ui.features.profile.ProfileViewModel
 import com.uvg.budget_buddy.ui.theme.ThemeViewModel
 import kotlinx.coroutines.delay
 
@@ -38,9 +40,13 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     val nav = rememberNavController()
     val backEntry by nav.currentBackStackEntryAsState()
     val route = backEntry?.destination?.route
-    val tabRoutes = listOf(Screen.Dashboard.route, Screen.AddIncome.route, Screen.AddExpense.route)
 
-    // Inicializar dependencias
+    val tabRoutes = listOf(
+        Screen.Dashboard.route,
+        Screen.AddIncome.route,
+        Screen.AddExpense.route
+    )
+
     val database = remember { AppDatabase.getInstance(context) }
     val userPreferences = remember { UserPreferencesDataStore(context) }
     val authRepository = remember { AuthRepository(userPreferences = userPreferences) }
@@ -49,7 +55,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         FirebaseBudgetRepository(firebaseDb, database.transactionDao(), authRepository)
     }
 
-    // ViewModels
     val loginVm: LoginViewModel = viewModel(
         factory = viewModelFactory {
             initializer { LoginViewModel(authRepository) }
@@ -62,7 +67,6 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         }
     )
 
-    // CAMBIO IMPORTANTE: Pasar authRepository al DashboardViewModel
     val dashboardVm: DashboardViewModel = viewModel(
         factory = viewModelFactory {
             initializer { DashboardViewModel(budgetRepo, authRepository) }
@@ -87,24 +91,20 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         }
     )
 
-    val profileVm: com.uvg.budget_buddy.ui.features.profile.ProfileViewModel = viewModel(
+    val profileVm: ProfileViewModel = viewModel(
         factory = viewModelFactory {
-            initializer { com.uvg.budget_buddy.ui.features.profile.ProfileViewModel(authRepository) }
+            initializer { ProfileViewModel(authRepository) }
         }
     )
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val isDark by themeVm.isDarkMode.collectAsState()
 
-    // Observar estado de autenticación
     val authState by authRepository.observeAuthState().collectAsState(initial = null)
     val isLoggedIn = authState != null
 
-    // Estado para controlar la navegación después del registro
     var hasNavigatedAfterRegister by remember { mutableStateOf(false) }
 
-    // Manejar navegación después del registro exitoso
     LaunchedEffect(isLoggedIn, route) {
         if (isLoggedIn && !hasNavigatedAfterRegister) {
             if (route == Screen.Register.route || route == Screen.Login.route) {
@@ -130,6 +130,13 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
         drawerState = drawerState,
         drawerContent = {
             AppDrawer(
+                currentRoute = route,
+                onHome = {
+                    scope.launch { drawerState.close() }
+                    nav.navigate(Screen.Dashboard.route) {
+                        popUpTo("app") { inclusive = false }
+                    }
+                },
                 onProfile = {
                     scope.launch { drawerState.close() }
                     nav.navigate(Screen.Profile.route)
@@ -150,23 +157,19 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
     ) {
         Scaffold(
             topBar = {
-                if (route in tabRoutes) {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                when (route) {
-                                    Screen.Dashboard.route -> "BudgetBuddy"
-                                    Screen.AddIncome.route -> "Añadir Ingreso"
-                                    Screen.AddExpense.route -> "Agregar Gasto"
-                                    else -> ""
-                                }
-                            )
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menú")
-                            }
-                        }
+                val title = when (route) {
+                    Screen.Dashboard.route -> "BudgetBuddy"
+                    Screen.AddIncome.route -> "Añadir ingreso"
+                    Screen.AddExpense.route -> "Agregar gasto"
+                    Screen.Profile.route   -> "Perfil"
+                    Screen.Settings.route  -> "Configuración"
+                    else -> null
+                }
+
+                if (title != null) {
+                    HeaderBar(
+                        title = title,
+                        onMenuClick = { scope.launch { drawerState.open() } }
                     )
                 }
             },
@@ -203,8 +206,8 @@ fun BudgetBuddyApp(themeVm: ThemeViewModel) {
                     addExpenseVm = addExpenseVm,
                     settingsVm = settingsVm,
                     profileVm = profileVm,
-                    isDark = isDark,
-                    onToggleDark = themeVm::setTheme
+                    themeVm = themeVm,
+                    authRepository = authRepository
                 )
             }
         }
